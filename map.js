@@ -45,10 +45,10 @@ refreshSecond = 600;        //ナウキャスト、天気図、台風を更新�
 // ここにないIDの場合は [0, null, null] で動作
 specials = {
     "ControlCenter": [1, 140.034635, 35.648209], //幕張メッセ イベントホール
-    "SmartPhone1"  : [1, 140.041966, 35.648417], //海浜幕張駅
-    "SmartPhone2"  : [1, 139.883557, 35.636065], //舞浜駅
-    "SmartPhone3"  : [1, 139.860296, 35.642245], //葛西臨海公園
-    "Tablet1"      : [1, 140.030909, 35.64524],  //ZOZOマリンスタジアム
+    "SmartPhone1": [1, 140.041966, 35.648417], //海浜幕張駅
+    "SmartPhone2": [1, 139.883557, 35.636065], //舞浜駅
+    "SmartPhone3": [1, 139.860296, 35.642245], //葛西臨海公園
+    "Tablet1": [1, 140.030909, 35.64524],  //ZOZOマリンスタジアム
 }
 
 function showMap() {
@@ -75,18 +75,18 @@ function showMap() {
     });
 
     // アイコンレイヤー
-    var iconMapStyleFunction = function(feature) {
+    var iconMapStyleFunction = function (feature) {
         var style = [
             new ol.style.Style({
                 image: new ol.style.Icon({
                     //src: feature.get("sel") ? "pic/map/location_circle@0,5x.png" : "pic/map/location_people@0,5x.png",
-                    src: getLocationIcon( feature.get("location") ),
+                    src: getLocationIcon(feature.get("location")),
                     scale: 1.0,
                     anchor: [0.5, 0.5]
                 }),
                 text: new ol.style.Text({
-                    fill: new ol.style.Fill({color: "#ff0000"}),
-                    stroke: new ol.style.Stroke({color: "#ffffff", width: 3}),
+                    fill: new ol.style.Fill({ color: "#ff0000" }),
+                    stroke: new ol.style.Stroke({ color: "#ffffff", width: 3 }),
                     //scale: 1.6,
                     textAlign: "center",
                     textBaseline: "top",
@@ -125,11 +125,11 @@ function showMap() {
         source: new ol.source.TileWMS({
             url: "https://wms.jmarinecloud.com/ms4w/htdocs/direction_raster.php",
             params: {
-                LAYERS:"area_02",
+                LAYERS: "area_02",
                 TRANSPARENT: true,
-                FORMAT:"image/png",
-                KIND:"nowcast_hi",
-                VERSION:"1.1.1",
+                FORMAT: "image/png",
+                KIND: "nowcast_hi",
+                VERSION: "1.1.1",
                 tm: new Date().getMilliseconds(),
             },
             visibility: true,
@@ -137,7 +137,7 @@ function showMap() {
     })
 
     // 天気図レイヤー
-    var weatherMapStyleFunction = function(feature) {
+    var weatherMapStyleFunction = function (feature) {
         let angle = feature.get("direction");
         var style = [
             new ol.style.Style({
@@ -147,8 +147,8 @@ function showMap() {
                     anchor: [0.5, 0.5]
                 }),
                 text: new ol.style.Text({
-                    fill: new ol.style.Fill({color: "#000000"}),
-                    stroke: new ol.style.Stroke({color: "#ffffff", width: 3}),
+                    fill: new ol.style.Fill({ color: "#000000" }),
+                    stroke: new ol.style.Stroke({ color: "#ffffff", width: 3 }),
                     //scale: 1.6,
                     textAlign: "center",
                     textBaseline: "top",
@@ -166,8 +166,8 @@ function showMap() {
                     rotation: Math.PI * angle / 180
                 }),
                 text: new ol.style.Text({
-                    fill: new ol.style.Fill({color: "#000000"}),
-                    stroke: new ol.style.Stroke({color: "#ffffff", width: 3}),
+                    fill: new ol.style.Fill({ color: "#000000" }),
+                    stroke: new ol.style.Stroke({ color: "#ffffff", width: 3 }),
                     //scale: 1.6,
                     textAlign: "center",
                     textBaseline: "top",
@@ -195,10 +195,10 @@ function showMap() {
         source: new ol.source.TileWMS({
             url: "https://wms.jmarinecloud.com/ms4w/htdocs/weather.php",
             params: {
-                LAYERS:"isobar",
+                LAYERS: "isobar",
                 TRANSPARENT: true,
-                FORMAT:"image/png",
-                VERSION:"1.1.1",
+                FORMAT: "image/png",
+                VERSION: "1.1.1",
                 tm: new Date().getMilliseconds(),
                 //'_' : (new Date).getTime(),
             },
@@ -211,10 +211,10 @@ function showMap() {
         source: new ol.source.TileWMS({
             url: "https://wms.jmarinecloud.com/ms4w/htdocs/weather.php",
             params: {
-                LAYERS:"front",
+                LAYERS: "front",
                 TRANSPARENT: true,
-                FORMAT:"image/png",
-                VERSION:"1.1.1",
+                FORMAT: "image/png",
+                VERSION: "1.1.1",
                 tm: new Date().getMilliseconds(),
                 //'_' : (new Date).getTime(),
             },
@@ -224,7 +224,7 @@ function showMap() {
 
 
     // 台風ベクタ
-    var typhoonMapStyleFunction = function(feature) {
+    var typhoonMapStyleFunction = function (feature) {
         var style = [
             new ol.style.Style({
                 image: new ol.style.Icon({
@@ -232,8 +232,8 @@ function showMap() {
                     anchor: [0.5, 0.5]
                 }),
                 text: new ol.style.Text({
-                    fill: new ol.style.Fill({color: "#000000"}),
-                    stroke: new ol.style.Stroke({color: "#ffffff", width: 3}),
+                    fill: new ol.style.Fill({ color: "#000000" }),
+                    stroke: new ol.style.Stroke({ color: "#ffffff", width: 3 }),
                     //scale: 1.6,
                     textAlign: "center",
                     textBaseline: "top",
@@ -261,10 +261,10 @@ function showMap() {
         source: new ol.source.TileWMS({
             url: "https://wms.jmarinecloud.com/ms4w/htdocs/typhoon.php",
             params: {
-                LAYERS:"typhoon_forecast_circle,typhoon_forecast_line,typhoon_track,typhoon_gale_now,typhoon_wind_now,typhoon_forecast_area,data_forecast_point,typhoon_stm_area",
+                LAYERS: "typhoon_forecast_circle,typhoon_forecast_line,typhoon_track,typhoon_gale_now,typhoon_wind_now,typhoon_forecast_area,data_forecast_point,typhoon_stm_area",
                 TRANSPARENT: true,
-                FORMAT:"image/png",
-                VERSION:"1.1.1",
+                FORMAT: "image/png",
+                VERSION: "1.1.1",
                 //'_' : (new Date).getTime(),
                 TIME: 24,
                 COUNT: 2,
@@ -277,7 +277,7 @@ function showMap() {
     //
     hazerdMapLayer = new ol.layer.Tile({
         source: new ol.source.XYZ({
-          url: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_kuni_data/{z}/{x}/{y}.png'
+            url: 'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_kuni_data/{z}/{x}/{y}.png'
         }),
         opacity: 1,
         visible: false
@@ -291,7 +291,7 @@ function showMap() {
 
     // viewを生成する
     mapView = new ol.View({
-        projection:"EPSG:3857",
+        projection: "EPSG:3857",
         center: ol.proj.transform(mapCenterCoord, "EPSG:4326", "EPSG:3857"),
         zoom: zoomVal
     });
@@ -299,7 +299,7 @@ function showMap() {
     // mapを生成する
     map = new ol.Map({
         target: 'map',
-        layers: 
+        layers:
             [
                 mainMapLayer,
                 hazerdMapLayer,
@@ -339,7 +339,7 @@ function showMap() {
     initDraw();
     initFreeErase();
 
-    map.on("click", function(e) {
+    map.on("click", function (e) {
 
         if (eraseMode) {
             eraseNearest(e.coordinate);
@@ -367,7 +367,7 @@ function showMap() {
                     y = screen.width - 120;
                 }
                 $("#commuName>span").text(feature.get("id"));
-                $("#commuDialog").show().offset({left: x, top: y});
+                $("#commuDialog").show().offset({ left: x, top: y });
 
                 let dest = feature.get("id");
                 if (!users[dest] || !users[dest].cam) {
@@ -388,29 +388,29 @@ function showMap() {
 
                 const $commuStart = $("#commuStart");
                 $commuStart.off();
-                $commuStart.on("click", function() {
+                $commuStart.on("click", function () {
                     const dest = feature.get("id");
                     watchStart(dest);
 
                     clearTimeout(commuDialogTimerId);
                     commuDialogTimerId = null;
-                    $("#commuDialog").hide();                
+                    $("#commuDialog").hide();
                 });
 
                 const $commuEnd = $("#commuEnd");
                 $commuEnd.off();
-                $commuEnd.on("click", function() {
+                $commuEnd.on("click", function () {
                     const dest = feature.get("id");
                     watchEnd(dest);
 
                     clearTimeout(commuDialogTimerId);
                     commuDialogTimerId = null;
-                    $("#commuDialog").hide();                
+                    $("#commuDialog").hide();
                 });
 
-                commuDialogTimerId = setTimeout(function() {
+                commuDialogTimerId = setTimeout(function () {
                     commuDialogTimerId = null;
-                    $("#commuDialog").hide();                
+                    $("#commuDialog").hide();
                 }, 5000);
             }
             else if (feature.__$do_func__ != null) {
@@ -421,14 +421,14 @@ function showMap() {
         if (iconClick != true && commuDialogTimerId != null) {
             clearTimeout(commuDialogTimerId);
             commuDialogTimerId = null;
-            $("#commuDialog").hide();                
-        }                  
+            $("#commuDialog").hide();
+        }
     });
 
     let drawX;
     let drawY;
 
-    map.on("pointerdrag", function(e) {
+    map.on("pointerdrag", function (e) {
         if (eraseMode) {
             // const coords = ol.proj.toLonLat(e.coordinate);
             // const lon = coords[0];
@@ -450,7 +450,7 @@ function showMap() {
                 drawStartFlag = false;
             } else {
                 const xDiff = e.pixel[0] - drawX;
-                const yDiff = e.pixel[1] - drawY; 
+                const yDiff = e.pixel[1] - drawY;
                 if (multiTouch && Math.sqrt(xDiff * xDiff + yDiff * yDiff) > 50) {
                     return false;
                 } else {
@@ -461,7 +461,7 @@ function showMap() {
         }
     });
 
-    setInterval(function() {
+    setInterval(function () {
         if (nowcastLayer.getVisible()) {
             refreshNowcast();
         }
@@ -474,8 +474,7 @@ function showMap() {
     }, refreshSecond * 1000);
 }
 
-function getLocation(userId)
-{
+function getLocation(userId) {
     if (userId == myUid)
         return 0;
     else if (userId in specials)
@@ -484,8 +483,7 @@ function getLocation(userId)
         return 1;
 }
 
-function getLocationIcon(location)
-{
+function getLocationIcon(location) {
     if (location == 0)
         return "pic/map/location_circle@0,5x.png";
     else if (location == 1)
@@ -497,8 +495,8 @@ function getLocationIcon(location)
 }
 
 function refreshTileLayer(layer) {
-    const source = layer.getSource(); 
-    let params = source.getParams(); 
+    const source = layer.getSource();
+    let params = source.getParams();
     params.tm = new Date().getMilliseconds();
     source.updateParams(params);
 }
@@ -550,7 +548,7 @@ function curPos(uid) {
     // return;
 
     if (!uid) return;
-    
+
     //GPS前に送信
     position = {
         id: uid,
@@ -567,27 +565,27 @@ function curPos(uid) {
             //Success
             function (_pos) {
                 if (uid in specials) {
-/*
-                    position = {
-                        id: uid,
-                        lat: specials[uid][1],
-                        lng: specials[uid][0],
-                    }
-*/
-                    if ( (specials[uid][2] == null) || (specials[uid][1] == null) ) {
+                    /*
+                                        position = {
+                                            id: uid,
+                                            lat: specials[uid][1],
+                                            lng: specials[uid][0],
+                                        }
+                    */
+                    if ((specials[uid][2] == null) || (specials[uid][1] == null)) {
                         position = {
                             id: uid,
                             lat: _pos.coords.latitude,
                             lng: _pos.coords.longitude,
                             cam: myCamera
                         };
-                    }else{
+                    } else {
                         position = {
                             id: uid,
                             lat: specials[uid][2],
                             lng: specials[uid][1],
-                        cam: myCamera,
-                    };
+                            cam: myCamera,
+                        };
                     }
                 } else {
                     position = {
@@ -661,7 +659,7 @@ function curPos(uid) {
 
 function sendPositionRepeatedly() {
     // 1.5秒間隔で定期的にpostionを送信する
-    setInterval(function(){
+    setInterval(function () {
         // //テスト用
         // if (Math.random() < 0.05) {
         //     position.lng += (Math.random() - 0.5) * 0.003;
@@ -674,7 +672,7 @@ function sendPositionRepeatedly() {
     }, 1500);
 
     // 10秒間隔でGPS測定
-    setInterval(function() {
+    setInterval(function () {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 //Success
@@ -694,19 +692,19 @@ function sendPositionRepeatedly() {
                     //     latPos = _pos.coords.latitude + Math.random() * 0.02;
                     //     lngPos = _pos.coords.longitude + Math.random() * 0.02;
                     // }
-/*
+                    /*
+                                        if (myUid in specials) {
+                                        } else {
+                    */
                     if (myUid in specials) {
-                    } else {
-*/
-                    if (myUid in specials) {
-                        if ( (specials[myUid][2] == null) || (specials[myUid][1] == null) ) {
+                        if ((specials[myUid][2] == null) || (specials[myUid][1] == null)) {
                             position = {
                                 id: myUid,
                                 lat: _pos.coords.latitude,
                                 lng: _pos.coords.longitude,
                                 cam: myCamera
                             };
-                        }else{
+                        } else {
                             position = {
                                 id: myUid,
                                 lat: specials[myUid][2],
@@ -789,7 +787,7 @@ function changeMapIconPosition(userId, lng, lat) {
     if (feature) {
         const iconPoint = (new ol.geom.Point([lng, lat])).transform('EPSG:4326', 'EPSG:3857');
         feature.set("geometry", iconPoint);
-		//--------------------------------------------------------------
+        //--------------------------------------------------------------
         // by Nori 2018.11.20
         if (feature.__$clear_id__) {
             clearInterval(feature.__$clear_id__);
@@ -813,9 +811,9 @@ function deleteMapIcon(userId) {
     const feature = source.getFeatures().find(f => f.get("id") == userId);
     if (feature) {
         source.removeFeature(feature);
-		//--------------------------------------------------------------
+        //--------------------------------------------------------------
         // by Nori 2018.11.20
-        if (feature.__$clear_id__){
+        if (feature.__$clear_id__) {
             clearInterval(feature.__$clear_id__);
         }
         //--------------------------------------------------------------
@@ -835,9 +833,9 @@ function addMapIcon(userId, lng, lat) {
         //sel: userId == myUid ? true : false,
         location: getLocation(userId),
     });
-	//--------------------------------------------------------------
+    //--------------------------------------------------------------
     // by Nori 2018.11.20
-    if (userId == myUid){
+    if (userId == myUid) {
         newFeature.__$clear_id__ = setInterval(function () {
             flash(newFeature, 'red');
         }, 2500);
@@ -878,7 +876,7 @@ function onReceiveRenew(msg) {
                         changeMapIconPosition(userId, serverLng, serverLat);
                     }
                 }
-            }　
+            }
             delete serverData[userId];  //処理済
         } else {
             deleteUser(userId);
@@ -896,19 +894,19 @@ function onReceiveRenew(msg) {
     users = JSON.parse(msg);
 }
 
-socketio.on("renew", onReceiveRenew );
+socketio.on("renew", onReceiveRenew);
 
 function deleteUserIcon(id) {
     let source = getIconMapLayer().getSource();
-    source.getFeatures().forEach(function(feature, i) {
+    source.getFeatures().forEach(function (feature, i) {
         if (feature.get("id") == id) {
             source.removeFeature(feature);
-			//--------------------------------------------------------------
-			// by Nori 2018.11.21
-			if (feature.__$clear_id__){
-				clearInterval(feature.__$clear_id__);
-			}
-			//--------------------------------------------------------------			
+            //--------------------------------------------------------------
+            // by Nori 2018.11.21
+            if (feature.__$clear_id__) {
+                clearInterval(feature.__$clear_id__);
+            }
+            //--------------------------------------------------------------			
         }
     });
 }
@@ -916,18 +914,19 @@ function deleteUserIcon(id) {
 
 //////////////////////////////////////////////////////////////////////////////////////
 
+/*
 window.onresize = function () {
   setRemoteBox();
 };
+*/
 
-
-var disp_init = function(){
-  //------------------------------------------------------
-  //
-  fliper(localVideoElm);
+var disp_init = function () {
+    //------------------------------------------------------
+    //
+    fliper(localVideoElm);
 }
 
-var login = function(){
+var login = function () {
     if (init_user_id == "initial_user_id") {
         return getUniqueStr();
     } else {
@@ -952,7 +951,7 @@ var login = function(){
     // return dialog_result;
 }
 
-var getUniqueStr = function(myStrong){
+var getUniqueStr = function (myStrong) {
     var strong = 10;
     if (myStrong) strong = myStrong;
     return new Date().getTime().toString(16) + Math.floor(strong * Math.random()).toString(16)
@@ -960,20 +959,20 @@ var getUniqueStr = function(myStrong){
 
 // 天気図・台風アイコン取得
 
-function readWeatherIcon (wtype) {
+function readWeatherIcon(wtype) {
 
-	var base_url = 'https://wms.jmarinecloud.com/ms4w/htdocs/point.php';
-	var ajax_option = {
-		url: base_url + "?type=" + wtype,
-		//context: this,  //Window(Global)
-		dataType: 'jsonp',
-		//success: function(data){GPV_weather_readPressure.call(this, data)},
-		success: function(data){readWeatherIconExec(data, wtype)},
-	};
-	$.ajax(ajax_option);
+    var base_url = 'https://wms.jmarinecloud.com/ms4w/htdocs/point.php';
+    var ajax_option = {
+        url: base_url + "?type=" + wtype,
+        //context: this,  //Window(Global)
+        dataType: 'jsonp',
+        //success: function(data){GPV_weather_readPressure.call(this, data)},
+        success: function (data) { readWeatherIconExec(data, wtype) },
+    };
+    $.ajax(ajax_option);
 }
 
-function readWeatherIconExec (data, wtype) {
+function readWeatherIconExec(data, wtype) {
 
     if (wtype == "pressure") {
         const source = weatherLayer.getSource();
@@ -997,7 +996,7 @@ function readWeatherIconExec (data, wtype) {
         });
     }
     else if (wtype == "typhoon") {
-        const source = typhoonLayer.getSource(); 
+        const source = typhoonLayer.getSource();
         source.clear();
         Object.keys(data).forEach(function (k) {
             const p = data[k];
@@ -1017,8 +1016,7 @@ function readWeatherIconExec (data, wtype) {
     }
 }
 
-function iconConvert(fromIcon)
-{
+function iconConvert(fromIcon) {
     if (fromIcon == "https://wms.jmarinecloud.com/ms4w/htdocs/symbol/ICys_koukiatsu.gif")
         return "pic/map/icon_H.png";
     else if (fromIcon == "https://wms.jmarinecloud.com/ms4w/htdocs/symbol/ICys_teikiatsu.gif")
@@ -1027,15 +1025,15 @@ function iconConvert(fromIcon)
         return "pic/map/icon_TD.png";
     else if (fromIcon == "https://wms.jmarinecloud.com/ms4w/htdocs/symbol/ICys_taifu.gif")
         return "pic/map/icon_T.png";
-    return fromIcon;    
+    return fromIcon;
 }
 
-$("#mainMenuBtn").on("click", function() {
+$("#mainMenuBtn").on("click", function () {
     $("#mainMenu").hide();
     $("#subMenu").show();
 });
 
-$("#backBtn").on("click", function() {
+$("#backBtn").on("click", function () {
     if (writeMode) {
         writeBtnEnd();
     }
@@ -1043,7 +1041,7 @@ $("#backBtn").on("click", function() {
     $("#mainMenu").show();
 });
 
-$("#writeBtn,#backBtnWrite").on("click", function() {
+$("#writeBtn,#backBtnWrite").on("click", function () {
     if (!writeMode) {
         writeBtnStart();
     } else {
@@ -1068,7 +1066,7 @@ function writeBtnEnd() {
         spectrumClose();
     }
     if (eraseMode) {
-        $("#eraseBtn").css({"background-color": buttonBlue});
+        $("#eraseBtn").css({ "background-color": buttonBlue });
         eraseMode = false;
         map.removeInteraction(freeErase);
     } else {
@@ -1079,20 +1077,20 @@ function writeBtnEnd() {
     $("#subMenu").show();
 }
 
-$("#colorBtn").on("click", function() {
+$("#colorBtn").on("click", function () {
     if (sizeMode) {
         sizeBtnEnd();
-    } 
+    }
     if (eraseMode) {
         eraseBtnEnd();
     }
     if (!colorMode) {
         colorChangeEnable = false;
-        setTimeout(function() {
+        setTimeout(function () {
             colorChangeEnable = true;
         }, 300)
         $("#colorPicker").show();
-        $(this).css({"background-color": buttonRed});
+        $(this).css({ "background-color": buttonRed });
         colorMode = true;
     } else {
         drawLineColor = $("#picker").get().toHexString();
@@ -1100,10 +1098,9 @@ $("#colorBtn").on("click", function() {
     }
 });
 
-function spectrumClose()
-{
-    $("#colorDisp").css({"background-color": drawLineColor});
-    $("#colorBtn").css({"background-color": buttonBlue});
+function spectrumClose() {
+    $("#colorDisp").css({ "background-color": drawLineColor });
+    $("#colorBtn").css({ "background-color": buttonBlue });
     colorMode = false;
     $("#colorPicker").hide();
 }
@@ -1111,35 +1108,35 @@ function spectrumClose()
 function colorBtnInit() {
     let initColor = "#2196f3";
     var userAgent = navigator.userAgent.toLowerCase();
-    if (userAgent.indexOf("android") == -1){
+    if (userAgent.indexOf("android") == -1) {
         initColor = "#ff0000";
     }
 
     drawLineColor = initColor;
-    $("#colorDisp").css({"background-color": drawLineColor});
+    $("#colorDisp").css({ "background-color": drawLineColor });
 
     $("#picker").spectrum({
-        color: initColor, 
-        flat: true,   
+        color: initColor,
+        flat: true,
         showPalette: true,
         //hideAfterPaletteSelect: false,
         palette: [
-            ["#ffffff", "#cccccc", "#999999","#666666", "#333333", "#000000", "#f44336", "#ff9800", 
-            "#ffeb3b","#8bc34a", "#4caf50", "#03a9f4", initColor]
+            ["#ffffff", "#cccccc", "#999999", "#666666", "#333333", "#000000", "#f44336", "#ff9800",
+                "#ffeb3b", "#8bc34a", "#4caf50", "#03a9f4", initColor]
         ],
-        change: function(color) {
+        change: function (color) {
             if (colorChangeEnable) {
                 drawLineColor = color.toHexString();
                 spectrumClose();
             }
         },
-        move: function(color) {
-            $("#colorDisp").css({"background-color": color.toHexString()});
+        move: function (color) {
+            $("#colorDisp").css({ "background-color": color.toHexString() });
         }
     });
 }
 
-$("#sizeBtn").on("click", function() {
+$("#sizeBtn").on("click", function () {
     if (colorMode) {
         spectrumClose();
     }
@@ -1155,22 +1152,22 @@ $("#sizeBtn").on("click", function() {
 
 function sizeBtnStart() {
     $("#sizeContainer").show();
-    $("#sizeBtn").css({"background-color": buttonRed});
+    $("#sizeBtn").css({ "background-color": buttonRed });
     $("#sizeText").html("幅：" + drawLineWidth);
-    $("#sizeDisp").css({"border-bottom-width": drawLineWidth + "px"});
+    $("#sizeDisp").css({ "border-bottom-width": drawLineWidth + "px" });
     sizeMode = true;
 }
 
 function sizeBtnEnd() {
     $("#sizeContainer").hide();
-    $("#sizeBtn").css({"background-color": buttonBlue});
+    $("#sizeBtn").css({ "background-color": buttonBlue });
     sizeMode = false;
 }
 
-$("#sizeSlider").on("input", function() {
+$("#sizeSlider").on("input", function () {
     drawLineWidth = $(this).val();
     $("#sizeText").html("幅：" + drawLineWidth);
-    $("#sizeDisp").css({"border-bottom-width": drawLineWidth + "px"});
+    $("#sizeDisp").css({ "border-bottom-width": drawLineWidth + "px" });
 
 });
 
@@ -1203,7 +1200,7 @@ function initDraw() {
         //freehandCondition: ol.events.condition.noModifierKeys
     });
 
-    freeDraw.on("drawstart", function(e) {
+    freeDraw.on("drawstart", function (e) {
         multiTouch = false;
         drawStartFlag = true;
         var style_modify = new ol.style.Style({
@@ -1222,7 +1219,7 @@ function initDraw() {
             timerId = null;
         }
         timerCnt = 100;
-        timerId = setInterval(function() {
+        timerId = setInterval(function () {
             sendDraw(currentFeature, lineId);
             if (--timerCnt <= 0) {
                 clearInterval(timerId);
@@ -1231,7 +1228,7 @@ function initDraw() {
         }, 200);
     });
 
-    freeDraw.on("drawend", function(e){
+    freeDraw.on("drawend", function (e) {
         clearInterval(timerId);
         const currentFeature = e.feature;//this is the feature fired the event
         //const id = getUniqueStr();
@@ -1243,7 +1240,7 @@ function initDraw() {
 
 }
 
-$(window).on("touchstart", function(e) {
+$(window).on("touchstart", function (e) {
     if (writeMode) {
         if (e.touches.length > 1) {
             multiTouch = true;
@@ -1276,7 +1273,7 @@ function initFreeErase() {
         //freehandCondition: ol.events.condition.noModifierKeys
     });
 
-    freeErase.on("drawstart", function(e) {
+    freeErase.on("drawstart", function (e) {
         var style_modify = new ol.style.Style({
             stroke: new ol.style.Stroke({
                 width: 1,
@@ -1287,9 +1284,9 @@ function initFreeErase() {
         currentFeature.setStyle(style_modify);
     });
 
-    freeDraw.on("drawend", function(){
+    freeDraw.on("drawend", function () {
         const source = freeEraseLayer.getSource();
-        source.getFeatures().forEach(function(feature) {
+        source.getFeatures().forEach(function (feature) {
             source.removeFeature(feature);
         });
     });
@@ -1301,7 +1298,7 @@ function sendDraw(feature, id) {
     data.color = drawLineColor;
     data.id = id;
     data.coords = [];
-    feature.getGeometry().getCoordinates().forEach(function(pair) {
+    feature.getGeometry().getCoordinates().forEach(function (pair) {
         data.coords.push(ol.proj.transform(pair, 'EPSG:3857', 'EPSG:4326'));
     })
     var jsonData = JSON.stringify(data);
@@ -1313,9 +1310,9 @@ function receiveDraw(data) {
     if (!data || !data.coords || data.coords.length == 0) {
         return;
     }
-    drawLayerSource.getFeatures().forEach(function(feature) {
+    drawLayerSource.getFeatures().forEach(function (feature) {
         if (feature.get("id") == data.id) {
-            drawLayerSource.removeFeature(feature);        
+            drawLayerSource.removeFeature(feature);
         }
     });
 
@@ -1337,11 +1334,11 @@ function receiveDraw(data) {
 }
 
 
-socketio.on("draw", function(jsonData) {
+socketio.on("draw", function (jsonData) {
     receiveDraw(JSON.parse(jsonData));
 });
 
-socketio.on("alldraw", function(jsonData) {
+socketio.on("alldraw", function (jsonData) {
     const dataSet = JSON.parse(jsonData);
     dataSet.forEach(function (data) {
         receiveDraw(data);
@@ -1349,7 +1346,7 @@ socketio.on("alldraw", function(jsonData) {
 });
 
 //手書き消去
-$("#eraseBtn").on("click", function() {
+$("#eraseBtn").on("click", function () {
     if (sizeMode) {
         sizeBtnEnd();
     }
@@ -1364,29 +1361,29 @@ $("#eraseBtn").on("click", function() {
 })
 
 function eraseBtnStart() {
-    $("#eraseBtn").css({"background-color": buttonRed});
+    $("#eraseBtn").css({ "background-color": buttonRed });
     map.removeInteraction(freeDraw);
     map.addInteraction(freeErase);
     eraseMode = true;
 }
 
 function eraseBtnEnd() {
-    $("#eraseBtn").css({"background-color": buttonBlue});
+    $("#eraseBtn").css({ "background-color": buttonBlue });
     eraseMode = false;
     map.removeInteraction(freeErase);
     map.addInteraction(freeDraw);
 }
 
-function eraseNearest(myCoord){
+function eraseNearest(myCoord) {
     const max = 250 / (2 ** (map.getView().getZoom() - 14));
     let minFeature;
     let minDist = -1;
 
-    drawLayerSource.getFeatures().forEach(function(feature) {
+    drawLayerSource.getFeatures().forEach(function (feature) {
         const geometry = feature.get("geometry");
         const coords = geometry.getCoordinates();
         //console.log(coords);
-        coords.forEach(function(coord) {
+        coords.forEach(function (coord) {
             const xDist = Math.abs(coord[0] - myCoord[0]);
             const yDist = Math.abs(coord[1] - myCoord[1]);
             if (xDist + yDist <= max) {
@@ -1407,34 +1404,70 @@ function eraseNearest(myCoord){
     }
 }
 
-socketio.on("erase", function(id) {
-    drawLayerSource.getFeatures().forEach(function(feature) {
+socketio.on("erase", function (id) {
+    drawLayerSource.getFeatures().forEach(function (feature) {
         if (feature.get("id") == id) {
-            drawLayerSource.removeFeature(feature);        
+            drawLayerSource.removeFeature(feature);
         }
     });
 });
 
-$("#telBtn").on("click", function() {
+$("#telBtn").on("click", function () {
     AndroidApplicationJavascriptInterface["changeScreen"](3);
 });
 
-$("#locationBtn").on("click", function() {
+$("#locationBtn").on("click", function () {
     if (position && position.lng && position.lat) {
         mapView.setCenter(ol.proj.transform([position.lng, position.lat], "EPSG:4326", "EPSG:3857"));
+
+        //--------------------------------------------------------------------------------
+        // add by nori 2019.01.27
+        // when btn clicked, location of all devices syncronaized.
+        //
+        const coord = ol.proj.transform(mapView.getCenter(), 'EPSG:3857', 'EPSG:4326');
+        const location_view = JSON.stringify({
+            lat: coord[1],
+            lng: coord[0],
+            zoom: mapView.getZoom()
+        });
+        console.log(location_view);
+        socketio.emit("location_view", location_view);
+        //--------------------------------------------------------------------------------
     }
 });
+//--------------------------------------------------------------------------------
+// add by nori 2019.01.27
+// {location_view: {lat:lat, lng:lng, zoom:zoom}}
+socketio.on("location_view", (msg) => {
+    console.log("Recived location CMD");
+    console.log(`location_view=${msg}`);
+    const data = JSON.parse(msg);
+
+    if (data && data.lng && data.lat) {
+        mapView.setCenter(ol.proj.transform([data.lng, data.lat], "EPSG:4326", "EPSG:3857"));
+        mapView.setZoom(data.zoom);
+    }
+});
+//--------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------
+// add by nori 2019.02.22
+$("#cam360Btn").on("click", function () {
+    $("#theta-viewer").toggle();
+});
+
+
 
 //$("#videoBtn").css({"background-color": buttonRed});
 var videoMode = true;
 var videoHides = [];
 
-$("#videoBtn").on("click", function() {
+$("#videoBtn").on("click", function () {
     if (videoMode) {
         $("#localBox").hide();
         $("#remoteBox").hide();
         videoHides = [];
-        $(".videoTitle").each(function(i, elm) {
+        $(".videoTitle").each(function (i, elm) {
             const id = elm.innerHTML;
             if (remoteVideoElms[id]) {
                 videoHides.push(id);
@@ -1445,7 +1478,7 @@ $("#videoBtn").on("click", function() {
     } else {
         $("#localBox").show();
         $("#remoteBox").show();
-        $(".videoTitle").each(function(i, elm) {
+        $(".videoTitle").each(function (i, elm) {
             const id = elm.innerHTML;
             if (videoHides.indexOf(id) >= 0) {
                 enableButton();
@@ -1457,7 +1490,7 @@ $("#videoBtn").on("click", function() {
     videoMode = !videoMode;
 });
 
-$("#layerBtn").on("click", function() {
+$("#layerBtn").on("click", function () {
     if (writeMode) {
         writeBtnEnd();
     }
@@ -1468,28 +1501,28 @@ $("#layerBtn").on("click", function() {
     if (y < 0) {
         y = 0;
     }
-    $layerDialog.css({top: y + "px"}).show();
+    $layerDialog.css({ top: y + "px" }).show();
 
-    $(".layerDialogContent>img").each(function(i, elm) {
+    $(".layerDialogContent>img").each(function (i, elm) {
         const layers = gatWeatherLayers(elm.id.substring(5));
         const currentVisible = layers[0] == null ? false : layers[0].getVisible();
         elm.src = currentVisible ? "/pic/dialog/select_yes.png" : "/pic/dialog/select_no.png";
     });
 });
 
-$("#backBtn2").on("click", function() {
+$("#backBtn2").on("click", function () {
     $("#layerDialog").hide();
     //$("#subMenu").hide();
     //$("#mainMenu").show();
 });
 
-$(".layerDialogContent>img").on("click", function() {
+$(".layerDialogContent>img").on("click", function () {
     const layers = gatWeatherLayers(this.id.substring(5));
     if (layers == null || layers.length == 0 || layers[0] == null) {
         return;
     }
     const currentVisible = layers[0].getVisible();
-    layers.forEach(function(layer) {
+    layers.forEach(function (layer) {
         layer.setVisible(!currentVisible);
     })
     this.src = currentVisible ? "/pic/dialog/select_no.png" : "/pic/dialog/select_yes.png";
@@ -1512,7 +1545,7 @@ $(".layerDialogContent>input").on("input", function () {
         return;
     }
     const val = $(this).val();
-    layers.forEach(function(layer) {
+    layers.forEach(function (layer) {
         //console.log(val);
         layer.setOpacity(val / 100);
     })
@@ -1539,13 +1572,13 @@ function gatWeatherLayers(kind) {
 weathTimeMode = false;
 weatherTime = 0;
 
-$("#weathBtn").on("click", function() {
+$("#weathBtn").on("click", function () {
     $("#subMenu").hide();
     showWeathTime();
     $("#weathMenu").show();
 });
 
-$("#weathTimeBtn").on("click", function() {
+$("#weathTimeBtn").on("click", function () {
     if (!weathTimeMode) {
         weathTimeBtnStart();
     } else {
@@ -1555,28 +1588,28 @@ $("#weathTimeBtn").on("click", function() {
 
 function weathTimeBtnStart() {
     $("#timeContainer").show();
-    $("#weathTimeBtn").css({"background-color": buttonRed});
+    $("#weathTimeBtn").css({ "background-color": buttonRed });
     weathTimeMode = true;
 }
 
 function weathTimeBtnEnd() {
     $("#timeContainer").hide();
-    $("#weathTimeBtn").css({"background-color": buttonBlue});
+    $("#weathTimeBtn").css({ "background-color": buttonBlue });
     weathTimeMode = false;
 }
 
-$("#timeSlider").on("input", function() {
+$("#timeSlider").on("input", function () {
     weatherTime = $(this).val();
     showWeathTime();
     refreshNowcast();
 });
 
 function showWeathTime() {
-    const txt = weatherTime == 0 ? "現在"  : (weatherTime < 0 ? `${-weatherTime}H前` : `${weatherTime}H後`);
+    const txt = weatherTime == 0 ? "現在" : (weatherTime < 0 ? `${-weatherTime}H前` : `${weatherTime}H後`);
     $("#timeText").html(txt);
 }
 
-$("#backBtnWeath").on("click", function() {
+$("#backBtnWeath").on("click", function () {
     weathTimeBtnEnd();
     $("#weathMenu").hide();
     $("#subMenu").show();
@@ -1586,25 +1619,25 @@ function refreshNowcastLayer(diffHour) {
 
     const dt = new Date((new Date()).getTime() + diffHour * 60 * 60 * 1000);
     const yr = dt.getFullYear();
-    const mt = ("00" + (dt.getMonth()+1)).slice(-2);
+    const mt = ("00" + (dt.getMonth() + 1)).slice(-2);
     const dy = ("00" + dt.getDate()).slice(-2);
     const hr = ("00" + dt.getHours()).slice(-2);
     //const mn = ("00" + dt.getMinutes()).slice(-2);
     //const timeStr = yr + mt + dy + hr + mn + "00_000_m"
     const timeStr = yr + mt + dy + hr + "0000_000_m"
 
-    const source = nowcastLayer.getSource(); 
-    let params = source.getParams(); 
+    const source = nowcastLayer.getSource();
+    let params = source.getParams();
     params.tm = new Date().getMilliseconds();
     if (diffHour == 0) {
         delete params.TIME;
     } else {
-        params.TIME = timeStr; 
+        params.TIME = timeStr;
     }
     source.updateParams(params);
 }
 
-$("#patBtn").on("click", function() {
+$("#patBtn").on("click", function () {
     sidebox_show(JISYOU_LAYER.menu_html);
 })
 
@@ -1613,32 +1646,32 @@ var sidebox_in_elm = document.getElementById('sidebox_in');
 var sidebox_x_elm = document.getElementById('sidebox_x');
 var sideboxs = document.getElementsByClassName('box27');
 
-sidebox_x_elm.addEventListener('click',function(e){
+sidebox_x_elm.addEventListener('click', function (e) {
     sidebox_close();
 });
 
-var sidebox_onclose_callback =null;
+var sidebox_onclose_callback = null;
 function sidebox_show(value, callback) {
-	// 2018/11/20 Aikawa
-	//sidebox_closeが呼ばれずにsidebox_showが呼ばれた場合sidebox_onclose_callbackを実行
-	if(sidebox_onclose_callback != null){
-		sidebox_onclose_callback();
-		sidebox_onclose_callback = null;
-	}
-	if (callback) sidebox_onclose_callback = callback;
-	
+    // 2018/11/20 Aikawa
+    //sidebox_closeが呼ばれずにsidebox_showが呼ばれた場合sidebox_onclose_callbackを実行
+    if (sidebox_onclose_callback != null) {
+        sidebox_onclose_callback();
+        sidebox_onclose_callback = null;
+    }
+    if (callback) sidebox_onclose_callback = callback;
+
     const $sidebox = $("#sidebox");
     const hi = window.innerHeight < screen.height ? window.innerHeight : screen.height;
     let y = hi - $sidebox.height();
     if (y < 0) {
         y = 0;
     }
-    $sidebox.css({top: y + "px"}).show();
+    $sidebox.css({ top: y + "px" }).show();
     $("#subMenu").hide();
 
-    if (typeof value == "string"){
+    if (typeof value == "string") {
         sidebox_in_elm.innerHTML = value;
-    } else if (typeof value == "object"){
+    } else if (typeof value == "object") {
         sidebox_in_elm.textContent = null;
         sidebox_in_elm.appendChild(value[0]);
     }
@@ -1647,12 +1680,12 @@ function sidebox_show(value, callback) {
 
 function sidebox_close() {
     sidebox_elm.style.display = 'none';
-	// 2018/11/20 Aikawa
-	//sidebox_onclose_callback();
-	if(sidebox_onclose_callback != null){
-		sidebox_onclose_callback();
-		sidebox_onclose_callback = null;
-	}
+    // 2018/11/20 Aikawa
+    //sidebox_onclose_callback();
+    if (sidebox_onclose_callback != null) {
+        sidebox_onclose_callback();
+        sidebox_onclose_callback = null;
+    }
     $("#subMenu").show();
 }
 
@@ -1663,19 +1696,19 @@ var centorbox_in_elm = document.getElementById('centorbox_in');
 var centorbox_x_elm = document.getElementById('centorbox_x');
 //var centorboxs = document.getElementsByClassName('box27');
 
-centorbox_x_elm.addEventListener('click',function(e){
+centorbox_x_elm.addEventListener('click', function (e) {
     centorbox_close();
 });
 
-var centorbox_onclose_callback =null;
+var centorbox_onclose_callback = null;
 function centorbox_show(value, callback) {
-	// 2018/11/20 Aikawa
-	if(centorbox_onclose_callback != null){
-		centorbox_onclose_callback();
-		centorbox_onclose_callback = null;
-	}
-	if (callback) centorbox_onclose_callback = callback;
-	
+    // 2018/11/20 Aikawa
+    if (centorbox_onclose_callback != null) {
+        centorbox_onclose_callback();
+        centorbox_onclose_callback = null;
+    }
+    if (callback) centorbox_onclose_callback = callback;
+
     const $centorbox = $("#centorbox");
 	/*
     const hi = window.innerHeight < screen.height ? window.innerHeight : screen.height;
@@ -1687,24 +1720,24 @@ function centorbox_show(value, callback) {
 	*/
     $("#subMenu").hide();
 
-    if (typeof value == "string"){
+    if (typeof value == "string") {
         centorbox_in_elm.innerHTML = value;
-    } else if (typeof value == "object"){
+    } else if (typeof value == "object") {
         centorbox_in_elm.textContent = null;
         centorbox_in_elm.appendChild(value[0]);
     }
-	$("#centorbox img").css("max-width", "100%");
+    $("#centorbox img").css("max-width", "100%");
     centorbox_elm.style.display = 'block';
 }
 
 function centorbox_close() {
     centorbox_elm.style.display = 'none';
-	// 2018/11/20 Aikawa
-	//centorbox_onclose_callback();
-	if(centorbox_onclose_callback != null){
-		centorbox_onclose_callback();
-		centorbox_onclose_callback = null;
-	}
+    // 2018/11/20 Aikawa
+    //centorbox_onclose_callback();
+    if (centorbox_onclose_callback != null) {
+        centorbox_onclose_callback();
+        centorbox_onclose_callback = null;
+    }
     $("#subMenu").show();
 }
 //-----------------------------------------------------------------------
@@ -1726,30 +1759,30 @@ var main_menu = {
         }
     },
     */
-    app : {        
-        icon : './1x/menu_menu@1x.png',
-        menu : {
-            layer_menu : {
-                click: function(){},
-                icon : './1x/menu_layer@1x.png'
+    app: {
+        icon: './1x/menu_menu@1x.png',
+        menu: {
+            layer_menu: {
+                click: function () { },
+                icon: './1x/menu_layer@1x.png'
             },
-            app1_menu  : {
-                click: function(){alert("サンプル/アプリ１")},
-                icon : '1x/menu_message@1x.png'
+            app1_menu: {
+                click: function () { alert("サンプル/アプリ１") },
+                icon: '1x/menu_message@1x.png'
             },
-            app2_menu  : {
-                click: function(){alert("サンプル/アプリ２")},
-                icon : '1x/menu_message@1x.png'
-            }    
+            app2_menu: {
+                click: function () { alert("サンプル/アプリ２") },
+                icon: '1x/menu_message@1x.png'
+            }
         }
     },
-    talk  : {
-        click: function(){alert("サンプル/通話機能\n頑張って通話する")},
-        icon : '1x/menu_tel@1x.png'
+    talk: {
+        click: function () { alert("サンプル/通話機能\n頑張って通話する") },
+        icon: '1x/menu_tel@1x.png'
     },
-    video  : {
-        click: function(){alert("サンプル/リアル映像機能\n頑張って映します")},
-        icon : '1x/menu_video@1x.png'
+    video: {
+        click: function () { alert("サンプル/リアル映像機能\n頑張って映します") },
+        icon: '1x/menu_video@1x.png'
     }
 };
 
