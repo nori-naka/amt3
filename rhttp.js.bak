@@ -125,8 +125,6 @@ io.on("connection", function (socket) {
         var data = JSON.parse(msg);
         if (data.dest) {
             //socket.broadcast.emit("publish", msg);
-            console.log(`publish data.dest=${data.dest} data.src=${data.src} data.type=${data.type}`);
-            //console.log(`user_sid[data.dest] =${user_sid[data.dest]}`);
             socket.to(user_sid[data.dest]).emit("publish", msg);
         } else {
             socket.broadcast.emit("publish", msg);
@@ -137,9 +135,6 @@ io.on("connection", function (socket) {
     // 位置情報着信
     socket.on("renew", function (msg) {
         var data = JSON.parse(msg);
-        //console.log(JSON.stringify(data, null, 2));
-        user_sid[data.id] = socket.id;
-
         //console.log(`ON RENEW : From=${data.id} LAT=${data.lat} LNG=${data.lng} CAM=${data.cam}`);
 
         if (data.id) {
@@ -147,8 +142,6 @@ io.on("connection", function (socket) {
             //console.log("RECIVE:USERHASH=" + JSON.stringify(userHash));
         }
     });
-
-    socket.on("log", function (msg) { console.log(msg) });
 
     // カメラ情報設定
     socket.on("camera", function (msg) {
