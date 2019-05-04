@@ -1,6 +1,6 @@
 var map;
 var mapView;
-var users;
+//var users;
 const zoomVal = 14;
 const mapCenterCoord = [140.034635, 35.648209]; //幕張メッセ イベントホール
 
@@ -22,8 +22,6 @@ var hazerdMapLayer;
 
 var freeDraw = null;
 
-users = {};
-
 const buttonBlue = "#38a2c0";
 const buttonRed = "#c03838";
 const buttonGray = "#bebebe";
@@ -38,6 +36,31 @@ var drawLineWidth = 7;
 var eraseMode = false;
 
 refreshSecond = 600;        //ナウキャスト、天気図、台風を更新する間隔（秒）
+
+// クライアントが送信するデータ
+// let position = {
+//     id: uid,
+//     lat: null,
+//     lng: null,
+//     cam: myCamera,
+//     constraints: constraints,
+// };
+
+// サーバがクライアントに返すデータ
+// let users = {
+//     user_id1: {
+//         ttl: ttl,
+//         lng: lng,
+//         lat: lat,
+//     },
+//     user_id2: {
+//         ttl: ttl,
+//         lng: lng,
+//         lat: lat,
+//     },
+// }
+let users = {};
+
 
 // "ID:[Type, Lon, Lat]"
 // Type { 1:人、2:車 }
@@ -849,52 +872,92 @@ function addMapIcon(userId, lng, lat) {
     source.addFeature(newFeature);
 }
 
-function onReceiveRenew(msg) {
-    //console.log(msg);
-    const serverData = JSON.parse(msg);
-    if (Object.keys(serverData).length == 0) {
-        return;
-    }
-    Object.keys(users).forEach(function (userId) {
-        if (serverData[userId]) {
-            const serverLng = serverData[userId].lng;
-            const serverLat = serverData[userId].lat;
-            if (users[userId].lng == null) {
-                if (serverLng == null) {
-                    //null->nullなら何もしない
-                } else {
-                    //null->位置ありなのでアイコン作成
-                    addMapIcon(userId, serverData[userId].lng, serverData[userId].lat);
-                }
-            } else {
-                if (serverLng == null) {
-                    //nullになったので削除
-                    deleteMapIcon(userId);
-                } else {
-                    //必要なら位置変更
-                    if (serverLng != users[userId].lng || serverLat != users[userId].lat) {
-                        changeMapIconPosition(userId, serverLng, serverLat);
-                    }
-                }
-            }
-            delete serverData[userId];  //処理済
+// function onReceiveRenew(msg) {
+//     //console.log(msg);
+//     const serverData = JSON.parse(msg);
+//     if (Object.keys(serverData).length == 0) {
+//         return;
+//     }
+//     Object.keys(users).forEach(function (userId) {
+//         if (serverData[userId]) {
+//             const serverLng = serverData[userId].lng;
+//             const serverLat = serverData[userId].lat;
+//             if (users[userId].lng == null) {
+//                 if (serverLng == null) {
+//                     //null->nullなら何もしない
+//                 } else {
+//                     //null->位置ありなのでアイコン作成
+//                     addMapIcon(userId, serverData[userId].lng, serverData[userId].lat);
+//                 }
+//             } else {
+//                 if (serverLng == null) {
+//                     //nullになったので削除
+//                     deleteMapIcon(userId);
+//                 } else {
+//                     //必要なら位置変更
+//                     if (serverLng != users[userId].lng || serverLat != users[userId].lat) {
+//                         changeMapIconPosition(userId, serverLng, serverLat);
+//                     }
+//                 }
+//             }
+//             delete serverData[userId];  //処理済
+//         } else {
+//             // delete for air-multi-talk
+//             //deleteUser(userId);
+//         }
+//     });
+//     Object.keys(serverData).forEach(function (userId) {
+//         if (userId != myUid) {
+//             addMenu(userId);
+//         }
+//         addMapIcon(userId, serverData[userId].lng, serverData[userId].lat);
+//     });
+//     // サーバーのデータを現在ユーザデータとする。
+//     users = JSON.parse(msg);
+// }
+
+// renew 受信時
+//socketio.on("renew", onReceiveRenew);
+
+// renew 受信時
+socketio.on("renew", function (msg) {
+    console.log(`RENEW MSG=${msg}`);
+    const data = JSON.parse(msg);
+
+    // 現在、保有しているリストによるユーザ
+    const cur_users = Object.keys(users)
+
+    // サーバからの通知された新しいリストと比較する。
+    Object.keys(data).forEach(function (new_user) {
+        // 現在のリストに居ない「通知されたユーザ」は追加する。
+        if (!cur_users.includes(new_user)) {
+            users[new_user] = {
+                lat: data[new_user].lat,
+                lng: data[new_user].lng
+            };
+            addMapIcon(new_user, data[new_user].lng, data[new_user].lat);
+        }
+    });
+
+    // 現在、保有しているリストと通知されたユーザを比較する。
+    cur_users.forEach(function (cur_user) {
+        if (!Object.keys(data).includes(cur_user)) {
+            // 現在、保有していても、通知されたユーザに無ければ、削除する。
+            console.log(`delete ${cur_user}`);
+            delete users[cur_user];
+            deleteMapIcon(cur_user);
+
         } else {
-            deleteUser(userId);
+            // 現在、保有しており、通知もされたユーザは、アイコン位置の更新を行う。
+            console.log(`USER=${cur_user}  LNG=${data[cur_user].lng} LAT=${data[cur_user].lat}`);
+            changeMapIconPosition(cur_user, data[cur_user].lng, data[cur_user].lat);
         }
-    });
+    })
 
-    Object.keys(serverData).forEach(function (userId) {
-        if (userId != myUid) {
-            addMenu(userId);
-        }
-        addMapIcon(userId, serverData[userId].lng, serverData[userId].lat);
-    });
+    // 現在保有しているリストを通知されたリストに更新する。
+    users = data;
+});
 
-    // サーバーのデータを現在ユーザデータとする。
-    users = JSON.parse(msg);
-}
-
-socketio.on("renew", onReceiveRenew);
 
 function deleteUserIcon(id) {
     let source = getIconMapLayer().getSource();
@@ -926,13 +989,14 @@ var disp_init = function () {
     fliper(localVideoElm);
 }
 
+/*
 var login = function () {
     if (init_user_id == "initial_user_id") {
         return getUniqueStr();
     } else {
         return init_user_id;
     }
-
+ 
     // let autoId;
     // if (localStorage.id) {
     //     autoId = localStorage.id;
@@ -950,6 +1014,7 @@ var login = function () {
     // //console.log(dialog_result + "でログインしました");
     // return dialog_result;
 }
+*/
 
 var getUniqueStr = function (myStrong) {
     var strong = 10;
@@ -1710,14 +1775,14 @@ function centorbox_show(value, callback) {
     if (callback) centorbox_onclose_callback = callback;
 
     const $centorbox = $("#centorbox");
-	/*
+    /*
     const hi = window.innerHeight < screen.height ? window.innerHeight : screen.height;
     let y = hi - $centorbox.height();
     if (y < 0) {
         y = 0;
     }
     $centorbox.css({top: y + "px"}).show();
-	*/
+    */
     $("#subMenu").hide();
 
     if (typeof value == "string") {

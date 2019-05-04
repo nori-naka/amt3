@@ -71,22 +71,36 @@ const stream_stop = function (stream) {
     stream.getTracks().forEach(track => track.stop());
 }
 
+//----- for air-multi-talk
+let myUid;
+
 const login = function () {
     const $login_dialog = new Create_dialog(document.body);
     $login_dialog.on_click(function (ev) {
 
-        local_id = $local_id.value;
+        local_id = $login_dialog.get_value();
         $local_name.innerText = local_id;
         $local_name.style.display = "inline-block";
 
-        setInterval(function () {
-            socketio.emit("renew", JSON.stringify({ id: local_id, constraints: constraints }));
-        }, 1500);
-    });
+        //----- for air-multi-talk
+        myUid = local_id;
 
+        /*
+        setInterval(function () {
+            const msg = JSON.stringify({ id: local_id, constraints: constraints });
+            socketio.emit("renew", msg);
+            LOG({
+                func: "socketio.emit",
+                text: msg
+            });
+        }, 1500);
+        */
+    });
     $login_dialog.get_element().style.display = "block";
+    return new Promise(function (resolve, rejects) {
+        resolve();
+    });
 }
-login();
 
 /*
 $local_id.onchange = function (ev) {

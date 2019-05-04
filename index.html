@@ -247,23 +247,28 @@
 
 
   <!--
-<script src="JISYOU_LAYER.js"></script>
--->
+  <script src="JISYOU_LAYER.js"></script>
   <script type="text/javascript" src="/main.js"></script>
+  -->
 
 
 
   <script>
+    login().then(function () {
+      curPos(myUid);
+      sendPositionRepeatedly();
+    });
+    showMap();
+
+    /*
     init_user_id = "initial_user_id";
     window.onload = function () {
-      /*
       setVideoSize();
       myUid = login();
       p2pInit(myUid);
       disp_init();
       showMap();
       curPos(myUid);
-      */
       sendPositionRepeatedly();
       colorBtnInit();
       if (myUid == "ControlCenter") {
@@ -272,7 +277,9 @@
       $("#myVideoTitle").html(myUid);
       //JISYOU_LAYER.add();
     }
+    */
 
+    /*
       (function ($) {
         'use strict';
         // #theta-viewerにパノラマ画像img/R0010035.JPGを表示
@@ -282,6 +289,7 @@
         });
       }(jQuery));
 
+    */
   </script>
 </body>
 

@@ -52,6 +52,8 @@ body {
     margin: 0px !important;
 }
 
+/* -- RTC --  */
+/* 
 #remoteBox {
     position: absolute;
     top: 0px;
@@ -67,8 +69,9 @@ body {
     width: 320px;
     height: auto;
 }
+ */
 
-.open {
+ .open {
     transform: translate(0);
 }
 
