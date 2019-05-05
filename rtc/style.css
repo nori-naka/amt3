@@ -13,23 +13,31 @@ body {
   width: 320px;
   height: auto;
   display: block;
+  z-index: 120;
 }
 
 #remote {
   position: absolute;
   top: 0px;
   right: 0px;
-  width: 340px;
-  height: 100%;
+  width: 320px;
+  /* height: 100%; */
   overflow-y: scroll;
   overflow-x: hidden;
-  z-index: 120;
+  z-index: 110;
 }
 #local {
   position: absolute;
   top: 0px;
   left: 0px;
-  width: 340px;
+  width: 320px;
+  z-index: 110;
+}
+
+.name {
+  position: absolute;
+  top: 0px;
+  left: 0px;
   z-index: 120;
 }
 

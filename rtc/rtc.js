@@ -134,9 +134,10 @@ const Create_elm = function (name, parent, a_class) {
 
     this.$li.appendChild(this.$name);
     this.$li.appendChild(this.$canvas);
-    this.$li.appendChild(this.$media);
+    // this.$li.appendChild(this.$media);
     this.$li.classList.add(a_class);
     parent.appendChild(this.$li);
+    parent.appendChild(this.$media);
     this.count = 0;
 }
 Create_elm.prototype.get_elm = function () {
