@@ -948,9 +948,15 @@ socketio.on("renew", function (msg) {
             deleteMapIcon(cur_user);
 
         } else {
-            // 現在、保有しており、通知もされたユーザは、アイコン位置の更新を行う。
+            // 現在、保有しており、通知もされたユーザ
             console.log(`USER=${cur_user}  LNG=${data[cur_user].lng} LAT=${data[cur_user].lat}`);
-            changeMapIconPosition(cur_user, data[cur_user].lng, data[cur_user].lat);
+
+            if (data[cur_user].lng == users[cur_user].lng && data[cur_user].lat == users[cur_user].lat) {
+                // 位置も移動していない場合、何もしない
+            } else {
+                // アイコンの位置を変更する
+                changeMapIconPosition(cur_user, data[cur_user].lng, data[cur_user].lat);
+            }
         }
     })
 
@@ -1529,27 +1535,31 @@ var videoHides = [];
 
 $("#videoBtn").on("click", function () {
     if (videoMode) {
-        $("#localBox").hide();
-        $("#remoteBox").hide();
+        $("#local").hide();
+        $("#remote").hide();
+        /*
         videoHides = [];
-        $(".videoTitle").each(function (i, elm) {
+        $(".user_title").each(function (i, elm) {
             const id = elm.innerHTML;
             if (remoteVideoElms[id]) {
                 videoHides.push(id);
                 watchEnd(id);
             }
         })
+        */
         //$("#videoBtn").css({"background-color": buttonBlue});
     } else {
-        $("#localBox").show();
-        $("#remoteBox").show();
-        $(".videoTitle").each(function (i, elm) {
+        $("#local").show();
+        $("#remote").show();
+        /*
+        $(".user_title").each(function (i, elm) {
             const id = elm.innerHTML;
             if (videoHides.indexOf(id) >= 0) {
                 enableButton();
                 watchStart(id);
             }
         })
+        */
         //$("#videoBtn").css({"background-color": buttonRed});
     }
     videoMode = !videoMode;

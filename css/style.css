@@ -77,7 +77,8 @@ body {
 }
 
 #map {
-    position: absolute;
+    /* position: absolute; */
+    position: fixed;
     top: 0px;
     height: 0px;
     width: 100%;

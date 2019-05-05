@@ -57,8 +57,8 @@ local_video_start = function () {
             selectDevices();
 
             let $local_level = document.getElementById("local_level");
-            const local_color = window.getComputedStyle($local, null).getPropertyValue("color");
-            local_level_meter = new Audio_meter(local_stream, $local_level, local_color);
+            //const local_color = window.getComputedStyle($local, null).getPropertyValue("color");
+            local_level_meter = new Audio_meter(local_stream, $local_level, "#2d8fdd");
         })
         .catch(function (err) {
             console.log(`gUM error:${err}`);
@@ -118,48 +118,79 @@ $local_id.onchange = function (ev) {
 */
 
 const Create_elm = function (name, parent, a_class) {
-    this.$li = document.createElement("li");
+    self = this;
+
+    // -- user name --
     this.$name = document.createElement("span");
     this.$name.classList.add("text");
     this.$name.innerText = name;
+
+    // -- load spiner --
+    this.$spiner = document.createElement("div");
+    this.$spiner.classList.add("dot-spin");
+    this.$spiner.style.display = "none";
+    this.$spiner.style.left = "30px";
+
+    // -- level meter --
+    this.$canvas = document.createElement("canvas");
+    this.$canvas.classList.add("level_meter");
+    //this.remote_color = window.getComputedStyle(this.$li, null).getPropertyValue("color");
+
+    this.$user_title = document.createElement("div");
+    this.$user_title.appendChild(this.$name);
+    this.$user_title.appendChild(this.$spiner);
+    this.$user_title.appendChild(this.$canvas);
+    this.$user_title.classList.add("user_title");
+
     this.$media = document.createElement("video");
     this.$media.classList.add("video");
     this.$media.style.display = "none";
     this.$media.setAttribute("playsinline", true);
 
-    // -- level meter --
-    this.$canvas = document.createElement("canvas");
-    this.$canvas.classList.add("text");
-    //this.remote_color = window.getComputedStyle(this.$li, null).getPropertyValue("color");
+    // 以下はiOS対策 iOSは複数のVIDEO再生時、audioをミュートしないと再生出来ない.
+    this.$media.muted = true;
+    this.$audio = document.createElement("audio");
+    this.$audio.style.display = "none";
 
-    this.$li.appendChild(this.$name);
-    this.$li.appendChild(this.$canvas);
-    // this.$li.appendChild(this.$media);
-    this.$li.classList.add(a_class);
-    parent.appendChild(this.$li);
-    parent.appendChild(this.$media);
-    this.count = 0;
+    this.$remote_user = document.createElement("div");
+    this.$remote_user.appendChild(this.$user_title);
+    this.$remote_user.appendChild(this.$media);
+    this.$remote_user.appendChild(this.$audio);
+    //this.$remote_user.classList.add(a_class);
+
+    parent.appendChild(this.$remote_user);
 }
+
 Create_elm.prototype.get_elm = function () {
-    return this.$li;
+    return this.$remote_user;
 }
+
 Create_elm.prototype.show = function (ev) {
     if (ev.track.kind == "video") {
         this.$media.srcObject = ev.streams[0];
         this.$media.style.display = "block";
         this.$media.play();
+
+        this.$audio.srcObject = ev.streams[0];
+        this.$audio.play();
+
+        // ロードスピナーを消す
+        this.$spiner.style.display = "none";
+
     } else {
         this.remote_level_meter = new Audio_meter(ev.streams[0], this.$canvas, "#2d8fdd");
     }
 }
 
 Create_elm.prototype.delete = function () {
-    this.$li.removeChild(this.$media);
-    this.$li.removeChild(this.$name);
-    this.$li.parentNode.removeChild(this.$li);
+    while (this.$remote_user.firstChild) {
+        this.$remote_user.removeChild(this.$remote_user.firstChild);
+    }
+    this.$remote_user.parentNode.removeChild(this.$remote_user);
 }
+
 Create_elm.prototype.on = function (event, handler) {
-    this.$li.addEventListener(event, handler);
+    this.$remote_user.addEventListener(event, handler);
 }
 
 socketio.on("renew", function (msg) {
@@ -174,7 +205,7 @@ socketio.on("renew", function (msg) {
     Object.keys(data).forEach(function (new_user) {
         if (!cur_users.includes(new_user) && new_user != local_id) {
             remotes[new_user] = {};
-            remotes[new_user].obj = new Create_elm(new_user, $remote, "user_list");
+            remotes[new_user].obj = new Create_elm(new_user, $remote, "");
             remotes[new_user].elm = remotes[new_user].obj.get_elm();
             remotes[new_user].peer = new RTCPeerConnection({
                 //sdpSemantics : "unified-plan",
@@ -256,6 +287,10 @@ socketio.on("renew", function (msg) {
             }
 
             remotes[new_user].obj.on("click", function () {
+
+                // ロードスピナーを表示
+                remotes[new_user].obj.$spiner.style.display = "inline-block";
+
                 if (tv_conf_mode) {
                     remotes[new_user].video_sender = remotes[new_user].peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
                     remotes[new_user].audio_sender = remotes[new_user].peer.addTrack(local_stream.getAudioTracks()[0], local_stream);

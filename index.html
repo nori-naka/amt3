@@ -13,6 +13,7 @@
   <link rel="stylesheet" type="text/css" href="css/style.css" />
   <link rel="stylesheet" type="text/css" href="rtc/style.css" />
   <link rel="stylesheet" type="text/css" href="rtc/dialog.css" />
+  <link rel="stylesheet" type="text/css" href="node_modules/three-dots/dist/three-dots.css" />
   <!--
 <link rel="stylesheet" href="css/JISYOU_LAYER.css" type="text/css">
 -->
@@ -52,9 +53,9 @@
     </li>
   </div> -->
   <div id="local">
-    <div class="name">
-      <div id="local_name" style="display:none;" class="text"></div>
-      <canvas id="local_level" class="text"></canvas>
+    <div class="user_title">
+      <span id="local_name" style="display:none;" class="text"></span>
+      <canvas id="local_level" class="level_meter"></canvas>
     </div>
     <video id="local_elm" class="video" muted autoplay playsinline></video>
   </div>
@@ -266,6 +267,10 @@
       sendPositionRepeatedly();
     });
     showMap();
+    colorBtnInit();
+    if (myUid == "ControlCenter") {
+      $("#telBtn").hide();
+    }
 
     /*
     init_user_id = "initial_user_id";
