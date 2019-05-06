@@ -1,5 +1,6 @@
 const socketio = io.connect();
 
+const $local_title = document.getElementById("local_title");
 const $local_name = document.getElementById("local_name");
 const $local_elm = document.getElementById("local_elm");
 const $remote = document.getElementById("remote");
@@ -8,6 +9,7 @@ let local_id = null;
 let local_stream = null;
 let audioCtx;
 let local_level_meter;
+let local_elm_view_flag = true;
 
 //-----------------------------------------
 const LOG = function (msg) {
@@ -81,6 +83,17 @@ const login = function () {
         local_id = $login_dialog.get_value();
         $local_name.innerText = local_id;
         $local_name.style.display = "inline-block";
+
+
+        $local_title.addEventListener("click", function (ev) {
+            if (local_elm_view_flag) {
+                $local_elm.style.display = "none";
+                local_elm_view_flag = false;
+            } else {
+                $local_elm.style.display = "block";
+                local_elm_view_flag = true;
+            }
+        })
 
         //----- for air-multi-talk
         myUid = local_id;
@@ -298,7 +311,8 @@ socketio.on("renew", function (msg) {
 
                     const stream = remotes[new_user].obj.$media.srcObject;
                     if (stream) {
-                        stream_stop(stream);
+                        stream.getTracks().forEach(function (track) { track.stop(); })
+                        // stream_stop(stream);
                         remotes[new_user].obj.$media.play();
                     }
                     socketio.emit("publish", JSON.stringify(
