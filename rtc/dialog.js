@@ -17,20 +17,17 @@ const Create_dialog = function (parent) {
             <span class="close" id="btn_close">&times;</span>
             <p>LOGIN</p>
             <div id="msg"></div>
+            <input id="input" type="text" class="text" style="width:80%"></input>
+            <div style="width:100%;">
+                <div id="btn_OK" style="right:0px" class="raised">OK</div>
+            </div>
         </div>`;
 
     this.elm.classList.add('modal');
     parent.appendChild(this.elm);
 
-    this.btn_OK = document.createElement("div");
-    this.btn_OK.innerText = "OK";
-    this.btn_OK.classList.add("raised");
-
-    this.input_text = document.createElement("input");
-    this.input_text.classList.add("text");
-
-    document.getElementById("msg").appendChild(this.input_text);
-    document.getElementById("msg").appendChild(this.btn_OK);
+    this.btn_OK = document.getElementById("btn_OK");
+    this.input_text = document.getElementById("input");
 
 }
 
