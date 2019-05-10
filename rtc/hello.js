@@ -6,10 +6,12 @@ socketio.on("publish", function(msg){
 	if (data.type == "hello") {
 		alert("in hello");
 		
-		socketio.emit("publish", {
-			type: "hello-hello",
-			dest: data.src,
-			src: local_id});
+		socketio.emit("publish", JSON.stringify({
+				type: "hello-hello",
+				dest: data.src,
+				src: local_id
+			});
+		);
 		console.log("hello resive");
 		
 		alert("out hello")
@@ -27,11 +29,11 @@ socketio.on("renew", function(msg){
 	const data = JSON.parse(msg);
 	
 	Object.keys(data).forEach(function(id){
-		socketio.emit("publish", 
-			{
+		socketio.emit("publish", JSON.stringify({
 				type: "hello",
 				dest: id,
 				src :local_id
-			});
+			})
+		);
 	});
 })
