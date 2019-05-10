@@ -42,6 +42,20 @@ let constraints = {
     }
 }
 
+const init = function (){
+	local_video_start();
+	
+	$local_title.addEventListener("click", function (ev) {
+            if (local_elm_view_flag) {
+                $local_elm.style.display = "none";
+                local_elm_view_flag = false;
+            } else {
+                $local_elm.style.display = "block";
+                local_elm_view_flag = true;
+            }
+        })
+}
+
 local_video_start = function () {
     navigator.mediaDevices.getUserMedia(constraints)
         .then(function (stream) {
@@ -65,54 +79,6 @@ local_video_start = function () {
         .catch(function (err) {
             console.log(`gUM error:${err}`);
         });
-}
-local_video_start();
-
-
-const stream_stop = function (stream) {
-    stream.getTracks().forEach(track => track.stop());
-}
-
-//----- for air-multi-talk
-let myUid;
-
-const login = function () {
-    const $login_dialog = new Create_dialog(document.body);
-    $login_dialog.on_click(function (ev) {
-
-        local_id = $login_dialog.get_value();
-        $local_name.innerText = local_id;
-        $local_name.style.display = "inline-block";
-
-
-        $local_title.addEventListener("click", function (ev) {
-            if (local_elm_view_flag) {
-                $local_elm.style.display = "none";
-                local_elm_view_flag = false;
-            } else {
-                $local_elm.style.display = "block";
-                local_elm_view_flag = true;
-            }
-        })
-
-        //----- for air-multi-talk
-        myUid = local_id;
-
-        /*
-        setInterval(function () {
-            const msg = JSON.stringify({ id: local_id, constraints: constraints });
-            socketio.emit("renew", msg);
-            LOG({
-                func: "socketio.emit",
-                text: msg
-            });
-        }, 1500);
-        */
-    });
-    $login_dialog.get_element().style.display = "block";
-    return new Promise(function (resolve, rejects) {
-        resolve();
-    });
 }
 
 /*
@@ -338,6 +304,38 @@ socketio.on("renew", function (msg) {
     })
 });
 
+const start_video_to = function (remote) {
+	
+	if (remote.video_sender) {
+		// 既に接続済みで
+		if (remote.video_sender.track) {
+			// trackがある場合には一旦削除して
+			remote.peer.removeTrack(remote.video_sender)
+		} else {
+			remote.video_sender = remote.peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
+		}
+	} else {
+		// 未接続の場合にはtrackの追加
+		remote.video_sender = remote.peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
+	}
+}
+
+const start_audio_to = function (remote) {
+	
+	if (remote.audio_sender) {
+		// 既に接続済みで
+		if (remote.audio_sender.track) {
+			// trackがある場合には一旦削除して
+			remote.peer.removeTrack(remote.audio_sender)
+		} else {
+			remote.audio_sender = remote.peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
+		}
+	} else {
+		// 未接続の場合にはtrackの追加
+		remote.audio_sender = remote.peer.addTrack(local_stream.getAuioTracks()[0], local_stream);
+	}
+}
+
 socketio.on("publish", function (msg) {
     const data = JSON.parse(msg);
 
@@ -412,7 +410,10 @@ socketio.on("publish", function (msg) {
                 func: "on video_start"
             });
             console.log("video_start");
+			
+			start_video_to(remotes[data.src]);
 
+/*
             if (remotes[data.src].video_sender) {
                 if (remotes[data.src].video_sender.track) {
                     remotes[data.src].peer.removeTrack(remotes[data.src].video_sender);
@@ -432,6 +433,7 @@ socketio.on("publish", function (msg) {
             } else {
                 remotes[data.src].audio_sender = remotes[data.src].peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
             }
+*/
 
             /*
             if (remotes[data.src].video_sender) {
@@ -456,3 +458,5 @@ socketio.on("publish", function (msg) {
         }
     }
 })
+
+init();
