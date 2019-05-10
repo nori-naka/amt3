@@ -412,6 +412,7 @@ socketio.on("publish", function (msg) {
             console.log("video_start");
 			
 			start_video_to(remotes[data.src]);
+			start_audio_to(remotes[data.src]);
 
 /*
             if (remotes[data.src].video_sender) {
