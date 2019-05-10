@@ -11,7 +11,6 @@ socketio.on("hello", function(msg){
 
 
 socketio.on("renew", function(msg){
-	alert("in renew");
 	const data = JSON.parse(msg);
 	
 	Object.keys(data).forEach(function(id){
@@ -21,7 +20,6 @@ socketio.on("renew", function(msg){
 				src :local_id
 			});
 	});
-	alert("out renew");
 })
 
 
