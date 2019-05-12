@@ -664,7 +664,7 @@ function curPos(uid) {
                 //    lng: mapCenterCoord[0] + Math.random() * 0.02,
                 //};
                 socketio.emit("renew", JSON.stringify(position));
-                console.log("RENEW SEND: " + JSON.stringify(position));
+                // console.log("RENEW SEND: " + JSON.stringify(position));
                 //sendPos("pos", uid, [pos.coords.latitude, pos.coords.longitude]);
                 // 自分自身に追従
                 if (position.lng != null) {
@@ -921,7 +921,7 @@ function addMapIcon(userId, lng, lat) {
 
 // renew 受信時
 socketio.on("renew", function (msg) {
-    console.log(`RENEW MSG=${msg}`);
+    // console.log(`RENEW MSG=${msg}`);
     const data = JSON.parse(msg);
 
     // 現在、保有しているリストによるユーザ
@@ -943,13 +943,13 @@ socketio.on("renew", function (msg) {
     cur_users.forEach(function (cur_user) {
         if (!Object.keys(data).includes(cur_user)) {
             // 現在、保有していても、通知されたユーザに無ければ、削除する。
-            console.log(`delete ${cur_user}`);
+            console.log(`${arguments.callee.name}: delete ${cur_user}`);
             delete users[cur_user];
             deleteMapIcon(cur_user);
 
         } else {
             // 現在、保有しており、通知もされたユーザ
-            console.log(`USER=${cur_user}  LNG=${data[cur_user].lng} LAT=${data[cur_user].lat}`);
+            // console.log(`USER=${cur_user}  LNG=${data[cur_user].lng} LAT=${data[cur_user].lat}`);
 
             if (data[cur_user].lng == users[cur_user].lng && data[cur_user].lat == users[cur_user].lat) {
                 // 位置も移動していない場合、何もしない
@@ -1501,7 +1501,7 @@ $("#locationBtn").on("click", function () {
             lng: coord[0],
             zoom: mapView.getZoom()
         });
-        console.log(location_view);
+        // console.log(location_view);
         socketio.emit("location_view", location_view);
         //--------------------------------------------------------------------------------
     }
@@ -1510,8 +1510,8 @@ $("#locationBtn").on("click", function () {
 // add by nori 2019.01.27
 // {location_view: {lat:lat, lng:lng, zoom:zoom}}
 socketio.on("location_view", (msg) => {
-    console.log("Recived location CMD");
-    console.log(`location_view=${msg}`);
+    // console.log("Recived location CMD");
+    // console.log(`location_view=${msg}`);
     const data = JSON.parse(msg);
 
     if (data && data.lng && data.lat) {

@@ -19,11 +19,15 @@ const Audio_meter = function (stream, canvas_elm, bar_color) {
 		this.bar_color = "#fff";
 	}
 
-	this.inputNode = audioCtx.createMediaStreamSource(stream);
-	this.analyserNode = audioCtx.createAnalyser();
-	this.inputNode.connect(this.analyserNode);
-	//stream.removeTrack(stream.getAudioTracks()[0]);
-	this.draw();
+	try {
+		this.inputNode = audioCtx.createMediaStreamSource(stream);
+		this.analyserNode = audioCtx.createAnalyser();
+		this.inputNode.connect(this.analyserNode);
+		//stream.removeTrack(stream.getAudioTracks()[0]);
+		this.draw();
+	} catch (err) {
+		LOG({ func: "Audio_meter", text: `${err}` });
+	}
 };
 
 Audio_meter.prototype.getCanvas = function () {

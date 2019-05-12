@@ -23,24 +23,30 @@ const LOG = function (msg) {
 let tv_conf_mode = false;
 
 let constraints = {
-    audio:
-    {
-        echoCancellationType: 'system'
-    },
-    video: {
-        width: {
-            min: 320,
-            max: 640
-        },
-        height: {
-            min: 240,
-            max: 480
-        },
-        frameRate: 20,
-        //facingMode: { exact: 'environment' }
-        //facingMode: { exact: 'user' }
-    }
+    audio: true,
+    video: true
 }
+
+
+// let constraints = {
+//     audio:
+//     {
+//         echoCancellationType: 'system'
+//     },
+//     video: {
+//         width: {
+//             min: 320,
+//             max: 640
+//         },
+//         height: {
+//             min: 240,
+//             max: 480
+//         },
+//         frameRate: 20,
+//         //facingMode: { exact: 'environment' }
+//         //facingMode: { exact: 'user' }
+//     }
+// }
 
 const init = function () {
     local_video_start();
@@ -78,23 +84,9 @@ local_video_start = function () {
         })
         .catch(function (err) {
             console.log(`gUM error:${err}`);
+            LOG({ func: "gMU", text: `${err}` });
         });
 }
-
-/*
-$local_id.onchange = function (ev) {
-    console.log(`$local_id:${ev.target.value}`);
-    local_id = ev.target.value;
-    $local_id.style.display = "none";
-    $local_name.innerText = local_id;
-    $local_name.style.display = "inline-block";
-    $login_dialog.style.display = "none";
-
-    setInterval(function () {
-        socketio.emit("renew", JSON.stringify({ id: local_id, constraints: constraints }));
-    }, 1500);
-}
-*/
 
 const Create_elm = function (name, parent, a_class) {
     self = this;
@@ -163,7 +155,7 @@ Create_elm.prototype.delete = function () {
     while (this.$remote_user.firstChild) {
         this.$remote_user.removeChild(this.$remote_user.firstChild);
     }
-    this.$remote_user.parentNode.removeChild(this.$remote_user);
+    //$remote.removeChild(this.$remote_user);
 }
 
 Create_elm.prototype.on = function (event, handler) {
@@ -182,6 +174,7 @@ socketio.on("renew", function (msg) {
     Object.keys(data).forEach(function (new_user) {
         if (!cur_users.includes(new_user) && new_user != local_id) {
             remotes[new_user] = {};
+            // remotes[new_user].hello_lock = false;
             remotes[new_user].obj = new Create_elm(new_user, $remote, "");
             remotes[new_user].elm = remotes[new_user].obj.get_elm();
             remotes[new_user].peer = new RTCPeerConnection({
@@ -257,36 +250,30 @@ socketio.on("renew", function (msg) {
                         })
                         .catch(function (err) {
                             console.log(`count=${remotes[new_user].count}`)
-                            console.log(`onnegotiationneeded: ${err}`);
+                            console.log(`onnegotiationneeded: ${err} delete remote: ${new_user}`);
+                            delete_remote(new_user);
                         })
 
                 }
             }
 
             remotes[new_user].obj.on("click", function () {
-
                 // ロードスピナーを表示
                 remotes[new_user].obj.$spiner.style.display = "inline-block";
 
-                if (tv_conf_mode) {
-                    remotes[new_user].video_sender = remotes[new_user].peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
-                    remotes[new_user].audio_sender = remotes[new_user].peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
-                } else {
-
-                    const stream = remotes[new_user].obj.$media.srcObject;
-                    if (stream) {
-                        stream.getTracks().forEach(function (track) { track.stop(); })
-                        // stream_stop(stream);
-                        remotes[new_user].obj.$media.play();
-                    }
-                    socketio.emit("publish", JSON.stringify(
-                        {
-                            type: "video_start",
-                            dest: new_user,
-                            src: local_id,
-                        })
-                    )
+                const stream = remotes[new_user].obj.$media.srcObject;
+                if (stream) {
+                    stream.getTracks().forEach(function (track) { track.stop(); })
+                    // stream_stop(stream);
+                    remotes[new_user].obj.$media.play();
                 }
+                socketio.emit("publish", JSON.stringify(
+                    {
+                        type: "video_start",
+                        dest: new_user,
+                        src: local_id,
+                    })
+                )
             });
 
         }
@@ -294,16 +281,24 @@ socketio.on("renew", function (msg) {
 
     cur_users.forEach(function (cur_user) {
         if (!Object.keys(data).includes(cur_user)) {
-            console.log(`delete ${cur_user}`);
-            remotes[cur_user].obj.delete();
-            delete remotes[cur_user].peer;
-            delete remotes[cur_user];
+            delete_remote(cur_user);
         }
     })
+
+    // 保持しているリストのリモートに対してhelloを送信する。
+    Object.keys(remotes).forEach(function (remote) {
+        socketio.emit("publish", JSON.stringify(
+            {
+                type: "hello",
+                dest: remote,
+                src: local_id,
+            }
+        ));
+    });
 });
 
-const start_video_to = function (remote) {
 
+const start_video_to = function (remote) {
     if (remote.video_sender) {
         // 既に接続済みで
         if (remote.video_sender.track) {
@@ -319,7 +314,6 @@ const start_video_to = function (remote) {
 }
 
 const start_audio_to = function (remote) {
-
     if (remote.audio_sender) {
         // 既に接続済みで
         if (remote.audio_sender.track) {
@@ -338,38 +332,39 @@ socketio.on("publish", function (msg) {
     const data = JSON.parse(msg);
 
     if (data.dest == local_id) {
-        if (data.type == "offer") {
 
-            if (tv_conf_mode) {
-                if (!remotes[data.src].video_sender) {
-                    remotes[data.src].video_sender = remotes[data.src].peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
-                }
-                if (!remotes[data.src].audio_sender) {
-                    remotes[data.src].audio_sender = remotes[data.src].peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
+        if (data.type == "hello") {
+            if (remotes[data.src] && remotes[data.src].peer) {
+                socketio.emit("publish", JSON.stringify(
+                    {
+                        type: "hello-hello",
+                        dest: data.src,
+                        src: local_id
+                    })
+                )
+            }
+        } else if (data.type == "hello-hello") {
+
+            if (remotes[data.src] && !remotes[data.src].audio_sender) {
+                if (remotes[data.src].peer.signalingState == "new" || remotes[data.src].peer.signalingState == "stable") {
+                    remotes[data.src].obj.$name.style.color = "green";
+                    start_audio_to(remotes[data.src]);
                 }
             }
+
+        } else if (data.type == "offer") {
 
             const remote_sdp = new RTCSessionDescription(data.sdp);
             remotes[data.src].peer.setRemoteDescription(remote_sdp)
                 .then(function () {
                     console.log(`socket_on offer: createAnswer`);
-                    // ---------LOG to server-------------
-                    socketio.emit("log", {
-                        from: data.src,
-                        to: local_id,
-                        func: "createAnswer"
-                    });
+                    LOG({ func: "offer", text: "createAnswer" });
 
                     return remotes[data.src].peer.createAnswer();
                 })
                 .then(function (answer) {
                     console.log(`socket_on offer: setLocalDescription answer`);
-                    // ---------LOG to server-------------
-                    socketio.emit("log", {
-                        from: data.src,
-                        to: local_id,
-                        func: "setLocalDescription answer"
-                    });
+                    LOG({ func: "offer", text: "setLocalDescription" });
 
                     const local_sdp = new RTCSessionDescription(answer);
                     return remotes[data.src].peer.setLocalDescription(local_sdp);
@@ -385,77 +380,37 @@ socketio.on("publish", function (msg) {
                     );
                 })
                 .catch(function (err) {
-                    console.log(`signal: ${err}`)
+                    console.log(`signal: ${err} delete user: ${data.src}`)
+                    delete_remote(data.src);
                 });
         } else if (data.type == "answer") {
             console.log(`setRemoteDescription`);
-            // ---------LOG to server-------------
-            socketio.emit("log", {
-                id: local_id,
-                func: "recive answer"
-            });
+            LOG({ func: "recived answer", text: "setRemoteDescription" });
 
             const remote_sdp = new RTCSessionDescription(data.sdp);
             remotes[data.src].peer.setRemoteDescription(remote_sdp)
+
         } else if (data.type == "candidate") {
             console.log(`addIceCandidate`);
             const candidate = new RTCIceCandidate(data.candidate);
             remotes[data.src].peer.addIceCandidate(candidate);
+
         } else if (data.type == "video_start") {
-            //------------LOG to server-------------------
-            socketio.emit("log", {
-                id: local_id,
-                func: "on video_start"
-            });
+            LOG({ func: "video_start", text: "video_start" });
             console.log("video_start");
 
             start_video_to(remotes[data.src]);
             //start_audio_to(remotes[data.src]);
-
-            /*
-                        if (remotes[data.src].video_sender) {
-                            if (remotes[data.src].video_sender.track) {
-                                remotes[data.src].peer.removeTrack(remotes[data.src].video_sender);
-                            } else {
-                                remotes[data.src].video_sender = remotes[data.src].peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
-                            }
-                        } else {
-                            remotes[data.src].video_sender = remotes[data.src].peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
-                        }
-            
-                        if (remotes[data.src].audio_sender) {
-                            if (remotes[data.src].audio_sender.track) {
-                                remotes[data.src].peer.removeTrack(remotes[data.src].audio_sender);
-                            } else {
-                                remotes[data.src].audio_sender = remotes[data.src].peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
-                            }
-                        } else {
-                            remotes[data.src].audio_sender = remotes[data.src].peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
-                        }
-            */
-
-            /*
-            if (remotes[data.src].video_sender) {
-                if (remotes[data.src].video_sender.track) {
-                    remotes[data.src].peer.removeTrack(remotes[data.src].video_sender);
-                }
-            }
-            setTimeout(function () {
-                remotes[data.src].video_sender = remotes[data.src].peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
-            }, 500);
-
-            if (remotes[data.src].audio_sender) {
-                if (remotes[data.src].audio_sender.track) {
-                    remotes[data.src].peer.removeTrack(remotes[data.src].audio_sender);
-                }
-            }
-            setTimeout(function () {
-                remotes[data.src].audio_sender = remotes[data.src].peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
-            }, 500);
-            */
 
         }
     }
 })
 
 init();
+
+function delete_remote(remote_id) {
+    console.log(`${arguments.callee.name}: delete ${remote_id}`);
+    remotes[remote_id].obj.delete();
+    delete remotes[remote_id].peer;
+    delete remotes[remote_id];
+}

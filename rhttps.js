@@ -210,7 +210,7 @@ io.on("connection", function (socket) {
 
     setInterval(function () {
         socket.emit("renew", JSON.stringify(userHash));
-        console.log(`SEND RENEW : USERHASH=${JSON.stringify(userHash)}`);
+        // console.log(`SEND RENEW : USERHASH=${JSON.stringify(userHash)}`);
         //console.log(`SEND RENEW : USER_SID=${JSON.stringify(user_sid)}`);
         //console.log("TIME: " + (new Date()).getTime());
 
