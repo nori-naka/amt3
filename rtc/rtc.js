@@ -42,18 +42,18 @@ let constraints = {
     }
 }
 
-const init = function (){
-	local_video_start();
-	
-	$local_title.addEventListener("click", function (ev) {
-            if (local_elm_view_flag) {
-                $local_elm.style.display = "none";
-                local_elm_view_flag = false;
-            } else {
-                $local_elm.style.display = "block";
-                local_elm_view_flag = true;
-            }
-        })
+const init = function () {
+    local_video_start();
+
+    $local_title.addEventListener("click", function (ev) {
+        if (local_elm_view_flag) {
+            $local_elm.style.display = "none";
+            local_elm_view_flag = false;
+        } else {
+            $local_elm.style.display = "block";
+            local_elm_view_flag = true;
+        }
+    })
 }
 
 local_video_start = function () {
@@ -150,15 +150,13 @@ Create_elm.prototype.show = function (ev) {
         this.$media.style.display = "block";
         this.$media.play();
 
-        this.$audio.srcObject = ev.streams[0];
-        this.$audio.play();
-
         // ロードスピナーを消す
         this.$spiner.style.display = "none";
-
-    } else {
-        this.remote_level_meter = new Audio_meter(ev.streams[0], this.$canvas, "#2d8fdd");
     }
+    this.$audio.srcObject = ev.streams[0];
+    this.$audio.play();
+
+    this.remote_level_meter = new Audio_meter(ev.streams[0], this.$canvas, "#2d8fdd");
 }
 
 Create_elm.prototype.delete = function () {
@@ -305,35 +303,35 @@ socketio.on("renew", function (msg) {
 });
 
 const start_video_to = function (remote) {
-	
-	if (remote.video_sender) {
-		// 既に接続済みで
-		if (remote.video_sender.track) {
-			// trackがある場合には一旦削除して
-			remote.peer.removeTrack(remote.video_sender)
-		} else {
-			remote.video_sender = remote.peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
-		}
-	} else {
-		// 未接続の場合にはtrackの追加
-		remote.video_sender = remote.peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
-	}
+
+    if (remote.video_sender) {
+        // 既に接続済みで
+        if (remote.video_sender.track) {
+            // trackがある場合には一旦削除して
+            remote.peer.removeTrack(remote.video_sender)
+        } else {
+            remote.video_sender = remote.peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
+        }
+    } else {
+        // 未接続の場合にはtrackの追加
+        remote.video_sender = remote.peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
+    }
 }
 
 const start_audio_to = function (remote) {
-	
-	if (remote.audio_sender) {
-		// 既に接続済みで
-		if (remote.audio_sender.track) {
-			// trackがある場合には一旦削除して
-			remote.peer.removeTrack(remote.audio_sender)
-		} else {
-			remote.audio_sender = remote.peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
-		}
-	} else {
-		// 未接続の場合にはtrackの追加
-		remote.audio_sender = remote.peer.addTrack(local_stream.getAuioTracks()[0], local_stream);
-	}
+
+    if (remote.audio_sender) {
+        // 既に接続済みで
+        if (remote.audio_sender.track) {
+            // trackがある場合には一旦削除して
+            remote.peer.removeTrack(remote.audio_sender)
+        } else {
+            remote.audio_sender = remote.peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
+        }
+    } else {
+        // 未接続の場合にはtrackの追加
+        remote.audio_sender = remote.peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
+    }
 }
 
 socketio.on("publish", function (msg) {
@@ -410,31 +408,31 @@ socketio.on("publish", function (msg) {
                 func: "on video_start"
             });
             console.log("video_start");
-			
-			start_video_to(remotes[data.src]);
-			//start_audio_to(remotes[data.src]);
 
-/*
-            if (remotes[data.src].video_sender) {
-                if (remotes[data.src].video_sender.track) {
-                    remotes[data.src].peer.removeTrack(remotes[data.src].video_sender);
-                } else {
-                    remotes[data.src].video_sender = remotes[data.src].peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
-                }
-            } else {
-                remotes[data.src].video_sender = remotes[data.src].peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
-            }
+            start_video_to(remotes[data.src]);
+            //start_audio_to(remotes[data.src]);
 
-            if (remotes[data.src].audio_sender) {
-                if (remotes[data.src].audio_sender.track) {
-                    remotes[data.src].peer.removeTrack(remotes[data.src].audio_sender);
-                } else {
-                    remotes[data.src].audio_sender = remotes[data.src].peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
-                }
-            } else {
-                remotes[data.src].audio_sender = remotes[data.src].peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
-            }
-*/
+            /*
+                        if (remotes[data.src].video_sender) {
+                            if (remotes[data.src].video_sender.track) {
+                                remotes[data.src].peer.removeTrack(remotes[data.src].video_sender);
+                            } else {
+                                remotes[data.src].video_sender = remotes[data.src].peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
+                            }
+                        } else {
+                            remotes[data.src].video_sender = remotes[data.src].peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
+                        }
+            
+                        if (remotes[data.src].audio_sender) {
+                            if (remotes[data.src].audio_sender.track) {
+                                remotes[data.src].peer.removeTrack(remotes[data.src].audio_sender);
+                            } else {
+                                remotes[data.src].audio_sender = remotes[data.src].peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
+                            }
+                        } else {
+                            remotes[data.src].audio_sender = remotes[data.src].peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
+                        }
+            */
 
             /*
             if (remotes[data.src].video_sender) {
