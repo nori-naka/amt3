@@ -1,5 +1,17 @@
 //----- for air-multi-talk
 let myUid;
+let audioCtx;
+
+// const initAudioContext = function () {
+//     document.removeEventListener('touchstart', initAudioContext);
+
+//     // wake up AudioContext
+//     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+//     const emptySource = audioCtx.createBufferSource();
+//     emptySource.start();
+//     emptySource.stop();
+// }
 
 const login = function () {
     const $login_dialog = new Create_dialog(document.body);
@@ -11,6 +23,9 @@ const login = function () {
 
         //----- for air-multi-talk
         myUid = local_id;
+        //----- for Audio Level Meter
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
     });
     $login_dialog.get_element().style.display = "block";
     return new Promise(function (resolve, rejects) {

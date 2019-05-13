@@ -7,7 +7,7 @@ const $remote = document.getElementById("remote");
 const remotes = {};
 let local_id = null;
 let local_stream = null;
-let audioCtx;
+//let audioCtx;
 let local_level_meter;
 let local_elm_view_flag = true;
 
@@ -405,6 +405,16 @@ socketio.on("publish", function (msg) {
         }
     }
 })
+
+// 人的処理が必要な場合のダミー処理
+// document.addEventListener('touchstart', initAudioContext);
+// function initAudioContext() {
+//     document.removeEventListener('touchstart', initAudioContext);
+//     // wake up AudioContext
+//     const emptySource = ctx.createBufferSource();
+//     emptySource.start();
+//     emptySource.stop();
+// }
 
 init();
 

@@ -6,7 +6,6 @@ const requestAnimationFrame = window.requestAnimationFrame ||
 	window.msRequestAnimationFrame;
 
 // AudioNodeを管理するAudioContextの生成
-
 const Audio_meter = function (stream, canvas_elm, bar_color) {
 
 	const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
