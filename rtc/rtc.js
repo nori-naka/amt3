@@ -335,6 +335,8 @@ socketio.on("publish", function (msg) {
 
         if (data.type == "hello") {
             if (remotes[data.src] && remotes[data.src].peer) {
+				start_audio_to(remotes[data.src]);
+				/*
                 socketio.emit("publish", JSON.stringify(
                     {
                         type: "hello-hello",
@@ -342,6 +344,7 @@ socketio.on("publish", function (msg) {
                         src: local_id
                     })
                 )
+				*/
             }
         } else if (data.type == "hello-hello") {
 
