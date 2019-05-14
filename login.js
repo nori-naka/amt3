@@ -1,5 +1,17 @@
 //----- for air-multi-talk
 let myUid;
+let audioCtx;
+
+// const initAudioContext = function () {
+//     document.removeEventListener('touchstart', initAudioContext);
+
+//     // wake up AudioContext
+//     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+//     const emptySource = audioCtx.createBufferSource();
+//     emptySource.start();
+//     emptySource.stop();
+// }
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
@@ -36,6 +48,11 @@ const login = function () {
 
         //----- for air-multi-talk
         myUid = local_id;
+<<<<<<< HEAD
+=======
+        //----- for Audio Level Meter
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+>>>>>>> e01e70db402df1f7c128752c1353277f2bf0b353
 
     });
     $login_dialog.get_element().style.display = "block";

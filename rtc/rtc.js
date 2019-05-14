@@ -287,17 +287,26 @@ socketio.on("renew", function (msg) {
                     type: "hello",
                     dest: new_user,
                     src: local_id,
-                }
-            ));
+                })
+            );
+        });
 
+    socketio.emit("publish", JSON.stringify(
+        {
+            type: "hello",
+            dest: new_user,
+            src: local_id,
         }
+    ));
+
+}
     });
 
-    cur_users.forEach(function (cur_user) {
-        if (!Object.keys(data).includes(cur_user)) {
-            delete_remote(cur_user);
-        }
-    })
+cur_users.forEach(function (cur_user) {
+    if (!Object.keys(data).includes(cur_user)) {
+        delete_remote(cur_user);
+    }
+})
 
     // 保持しているリストのリモートに対してhelloを送信する。
     // Object.keys(remotes).forEach(function (remote) {
@@ -423,6 +432,16 @@ socketio.on("publish", function (msg) {
         }
     }
 })
+
+// 人的処理が必要な場合のダミー処理
+// document.addEventListener('touchstart', initAudioContext);
+// function initAudioContext() {
+//     document.removeEventListener('touchstart', initAudioContext);
+//     // wake up AudioContext
+//     const emptySource = ctx.createBufferSource();
+//     emptySource.start();
+//     emptySource.stop();
+// }
 
 init();
 
