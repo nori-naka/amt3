@@ -9,7 +9,6 @@ const requestAnimationFrame = window.requestAnimationFrame ||
 
 const Audio_meter = function (stream, canvas_elm, bar_color) {
 
-	const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 	this.c = canvas_elm;
 	this.ctx = this.c.getContext('2d');
 

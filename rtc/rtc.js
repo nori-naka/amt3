@@ -7,7 +7,7 @@ const $remote = document.getElementById("remote");
 const remotes = {};
 let local_id = null;
 let local_stream = null;
-let audioCtx;
+// let audioCtx;
 let local_level_meter;
 let local_elm_view_flag = true;
 
@@ -187,6 +187,12 @@ socketio.on("renew", function (msg) {
                     { urls: "turn:numb.viagenie.ca", credential: "jrc@numb", username: "noriaki.nakamura@gmail.com" }
                 ]
             });
+            // 初期化時
+            LOG({
+                func: "onsignalingstatechange　-- initial",
+                text: remotes[new_user].peer.signalingState
+            });
+
             remotes[new_user].peer.onicecandidate = function (ev) {
                 console.log(`onicecandidate:ev=${JSON.stringify(ev)}`);
 
@@ -276,6 +282,14 @@ socketio.on("renew", function (msg) {
                 )
             });
 
+            socketio.emit("publish", JSON.stringify(
+                {
+                    type: "hello",
+                    dest: new_user,
+                    src: local_id,
+                }
+            ));
+
         }
     });
 
@@ -286,15 +300,15 @@ socketio.on("renew", function (msg) {
     })
 
     // 保持しているリストのリモートに対してhelloを送信する。
-    Object.keys(remotes).forEach(function (remote) {
-        socketio.emit("publish", JSON.stringify(
-            {
-                type: "hello",
-                dest: remote,
-                src: local_id,
-            }
-        ));
-    });
+    // Object.keys(remotes).forEach(function (remote) {
+    //     socketio.emit("publish", JSON.stringify(
+    //         {
+    //             type: "hello",
+    //             dest: remote,
+    //             src: local_id,
+    //         }
+    //     ));
+    // });
 });
 
 
@@ -334,15 +348,14 @@ socketio.on("publish", function (msg) {
     if (data.dest == local_id) {
 
         if (data.type == "hello") {
-            if (remotes[data.src] && remotes[data.src].peer) {
-                socketio.emit("publish", JSON.stringify(
-                    {
-                        type: "hello-hello",
-                        dest: data.src,
-                        src: local_id
-                    })
-                )
+
+            if (remotes[data.src] && !remotes[data.src].audio_sender) {
+                if (remotes[data.src].peer.signalingState == "new" || remotes[data.src].peer.signalingState == "stable") {
+                    remotes[data.src].obj.$name.style.color = "green";
+                    start_audio_to(remotes[data.src]);
+                }
             }
+
         } else if (data.type == "hello-hello") {
 
             if (remotes[data.src] && !remotes[data.src].audio_sender) {
@@ -354,9 +367,14 @@ socketio.on("publish", function (msg) {
 
         } else if (data.type == "offer") {
 
+
             const remote_sdp = new RTCSessionDescription(data.sdp);
             remotes[data.src].peer.setRemoteDescription(remote_sdp)
                 .then(function () {
+
+                    remotes[data.src].obj.$name.style.color = "green";
+                    start_audio_to(remotes[data.src]);
+
                     console.log(`socket_on offer: createAnswer`);
                     LOG({ func: "offer", text: "createAnswer" });
 
