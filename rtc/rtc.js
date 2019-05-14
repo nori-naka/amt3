@@ -275,6 +275,15 @@ socketio.on("renew", function (msg) {
                     })
                 )
             });
+			
+			socketio.emit("publish", JSON.stringify(
+            	{
+                	type: "hello",
+                	dest: new_user,
+                	src: local_id,
+            	})
+        	);
+    });
 
         }
     });
@@ -286,6 +295,7 @@ socketio.on("renew", function (msg) {
     })
 
     // 保持しているリストのリモートに対してhelloを送信する。
+	/*
     Object.keys(remotes).forEach(function (remote) {
         socketio.emit("publish", JSON.stringify(
             {
@@ -295,6 +305,7 @@ socketio.on("renew", function (msg) {
             }
         ));
     });
+	*/
 });
 
 
