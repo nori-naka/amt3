@@ -1,6 +1,6 @@
 //----- for air-multi-talk
 let myUid;
-let audioCtx;
+// let audioCtx;
 
 // const initAudioContext = function () {
 //     document.removeEventListener('touchstart', initAudioContext);
@@ -48,12 +48,6 @@ const login = function () {
 
         //----- for air-multi-talk
         myUid = local_id;
-<<<<<<< HEAD
-=======
-        //----- for Audio Level Meter
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
->>>>>>> e01e70db402df1f7c128752c1353277f2bf0b353
-
     });
     $login_dialog.get_element().style.display = "block";
     return new Promise(function (resolve, rejects) {
