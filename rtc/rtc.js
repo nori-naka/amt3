@@ -22,31 +22,31 @@ const LOG = function (msg) {
 //------------------------------------------
 let tv_conf_mode = false;
 
-let constraints = {
-    audio: true,
-    video: true
-}
-
-
 // let constraints = {
-//     audio:
-//     {
-//         echoCancellationType: 'system'
-//     },
-//     video: {
-//         width: {
-//             min: 320,
-//             max: 640
-//         },
-//         height: {
-//             min: 240,
-//             max: 480
-//         },
-//         frameRate: 20,
-//         //facingMode: { exact: 'environment' }
-//         //facingMode: { exact: 'user' }
-//     }
+//     audio: true,
+//     video: true
 // }
+
+
+let constraints = {
+    audio:
+    {
+        echoCancellationType: 'system'
+    },
+    video: {
+        width: {
+            min: 320,
+            max: 640
+        },
+        height: {
+            min: 240,
+            max: 480
+        },
+        frameRate: 20,
+        //facingMode: { exact: 'environment' }
+        //facingMode: { exact: 'user' }
+    }
+}
 
 const init = function () {
     local_video_start();
