@@ -174,7 +174,7 @@ socketio.on("renew", function (msg) {
     Object.keys(data).forEach(function (new_user) {
         if (!cur_users.includes(new_user) && new_user != local_id) {
             remotes[new_user] = {};
-            // remotes[new_user].hello_lock = false;
+            // remotes[new_user].lock = false;
             remotes[new_user].obj = new Create_elm(new_user, $remote, "");
             remotes[new_user].elm = remotes[new_user].obj.get_elm();
             remotes[new_user].peer = new RTCPeerConnection({
@@ -235,7 +235,7 @@ socketio.on("renew", function (msg) {
             remotes[new_user].peer.onnegotiationneeded = function (ev) {
                 console.log(`count=${remotes[new_user].count}`);
 
-                if (remotes[new_user].peer.signalingState == "new" || remotes[new_user].peer.signalingState == "stable") {
+                if (remotes[new_user].peer.signalingState == "stable") {
                     console.log(`signalingState=${remotes[new_user].peer.signalingState}`);
                     // ---------- LOG to server -------------------
                     LOG({
@@ -314,16 +314,14 @@ socketio.on("renew", function (msg) {
                 }
             });
 
-            if (new_user > local_id) {
-                socketio.emit("publish", JSON.stringify(
-                    {
-                        type: "hello",
-                        dest: new_user,
-                        src: local_id,
-                    })
-                );
-            }
-        };
+            socketio.emit("publish", JSON.stringify(
+                {
+                    type: "hello",
+                    dest: new_user,
+                    src: local_id,
+                })
+            );
+        }
     });
 
     cur_users.forEach(function (cur_user) {
@@ -362,32 +360,35 @@ const start_audio_to = function (remote) {
 socketio.on("publish", function (msg) {
     const data = JSON.parse(msg);
 
-    LOG({ func: "on publish", text: `from ${data.src} -> tp ${data.dest} : ${data.type}` });
-    console.log(`on publish  from ${data.src} -> tp ${data.dest} : ${data.type}`);
+    LOG({ func: "on publish", text: `from ${data.src} -> to ${data.dest} : ${data.type}` });
+    console.log(`on publish  from ${data.src} -> to ${data.dest} : ${data.type}`);
 
-    if (data.dest == local_id) {
 
+    if (!local_id || !remotes[data.src]) {
+
+        if (data.type == "hello") return;
+
+    } else if (data.dest == local_id) {
         if (data.type == "hello") {
 
-            if (remotes[data.src] && !remotes[data.src].audio_sender) {
-                if (remotes[data.src].peer.signalingState == "new" || remotes[data.src].peer.signalingState == "stable") {
-                    remotes[data.src].obj.$name.style.color = "green";
-                    start_audio_to(remotes[data.src]);
-                }
-            }
+            socketio.emit("publish", JSON.stringify(
+                {
+                    type: "hello-hello",
+                    dest: data.src,
+                    src: local_id,
+                })
+            );
 
         } else if (data.type == "hello-hello") {
 
             if (remotes[data.src] && !remotes[data.src].audio_sender) {
-                if (remotes[data.src].peer.signalingState == "new" || remotes[data.src].peer.signalingState == "stable") {
+                if (remotes[data.src].peer.signalingState == "stable") {
                     remotes[data.src].obj.$name.style.color = "green";
                     start_audio_to(remotes[data.src]);
                 }
             }
 
         } else if (data.type == "offer") {
-
-
             const remote_sdp = new RTCSessionDescription(data.sdp);
             remotes[data.src].peer.setRemoteDescription(remote_sdp)
                 .then(function () {
