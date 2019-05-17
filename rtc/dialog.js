@@ -8,9 +8,9 @@ $btn_close.onclick = function () {
 }
 */
 
-const Create_dialog = function (parent) {
+const Create_dialog = function (parent, a_func) {
 
-    self = this;
+    const self = this;
 
     this.elm = document.createElement('div');
     this.elm.innerHTML = `<div class="modal-content">
@@ -27,6 +27,11 @@ const Create_dialog = function (parent) {
     parent.appendChild(this.elm);
 
     this.btn_OK = document.getElementById("btn_OK");
+    this.btn_OK.addEventListener("click", function (ev) {
+        a_func(ev);
+        self.elm.style.display = "none";
+    });
+
     this.input_text = document.getElementById("input");
 
 }
@@ -41,15 +46,4 @@ Create_dialog.prototype.get_value = function () {
 
 Create_dialog.prototype.show = function () {
     this.elm.style.display = "block";
-}
-
-Create_dialog.prototype.close = function () {
-    this.elm.style.display = "none";
-}
-
-Create_dialog.prototype.on_click = function (func) {
-    this.btn_OK.addEventListener("click", function (ev) {
-        func(ev);
-        self.close();
-    });
 }

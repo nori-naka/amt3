@@ -9,7 +9,6 @@ let local_id = null;
 let local_stream = null;
 // let audioCtx;
 let local_level_meter;
-let local_elm_view_flag = true;
 
 //-----------------------------------------
 const LOG = function (msg) {
@@ -52,12 +51,10 @@ const init = function () {
     local_video_start();
 
     $local_title.addEventListener("click", function (ev) {
-        if (local_elm_view_flag) {
+        if ($local_elm.style.display == "block") {
             $local_elm.style.display = "none";
-            local_elm_view_flag = false;
         } else {
             $local_elm.style.display = "block";
-            local_elm_view_flag = true;
         }
     })
 }
@@ -89,7 +86,7 @@ local_video_start = function () {
 }
 
 const Create_elm = function (name, parent, a_class) {
-    self = this;
+    const self = this;
 
     // -- user name --
     this.$name = document.createElement("span");
@@ -101,6 +98,12 @@ const Create_elm = function (name, parent, a_class) {
     this.$spiner.classList.add("dot-spin");
     this.$spiner.style.display = "none";
     this.$spiner.style.left = "30px";
+
+    // -- Record button --
+    this.$record_btn = document.createElement("div");
+    this.$record_btn.innerText = "REC";
+    this.$record_btn.classList.add("raised_red");
+    this.$record_btn.style.display = "none";
 
     // -- level meter --
     this.$canvas = document.createElement("canvas");
@@ -120,12 +123,20 @@ const Create_elm = function (name, parent, a_class) {
 
     // 以下はiOS対策 iOSは複数のVIDEO再生時、audioをミュートしないと再生出来ない.
     this.$media.muted = true;
+
+    this.$a_media = document.createElement("video");
+    this.$a_media.classList.add("video");
+    this.$a_media.style.display = "block";
+    this.$a_media.setAttribute("playsinline", true);
+
     this.$audio = document.createElement("audio");
     this.$audio.style.display = "none";
 
     this.$remote_user = document.createElement("div");
     this.$remote_user.appendChild(this.$user_title);
+    this.$remote_user.appendChild(this.$record_btn);
     this.$remote_user.appendChild(this.$media);
+    this.$remote_user.appendChild(this.$a_media);
     this.$remote_user.appendChild(this.$audio);
     //this.$remote_user.classList.add(a_class);
 
@@ -141,6 +152,9 @@ Create_elm.prototype.show = function (ev) {
         this.$media.srcObject = ev.streams[0];
         this.$media.style.display = "block";
         this.$media.play();
+
+        this.record = new Record(this.$media, this.$record_btn, this.$a_media);
+        this.$record_btn.style.display = "block";
 
         // ロードスピナーを消す
         this.$spiner.style.display = "none";
@@ -159,7 +173,7 @@ Create_elm.prototype.delete = function () {
 }
 
 Create_elm.prototype.on = function (event, handler) {
-    this.$remote_user.addEventListener(event, handler);
+    this.$user_title.addEventListener(event, handler);
 }
 
 socketio.on("renew", function (msg) {
@@ -193,45 +207,10 @@ socketio.on("renew", function (msg) {
                 text: remotes[new_user].peer.signalingState
             });
 
-            remotes[new_user].peer.onicecandidate = function (ev) {
-                console.log(`onicecandidate:ev=${JSON.stringify(ev)}`);
+            remotes[new_user].peer.onicecandidate = on_icecandidate(new_user);
+            remotes[new_user].peer.ontrack = on_track(new_user);
+            remotes[new_user].peer.onsignalingstatechange = on_signalingstatechange(new_user)
 
-                if (ev.candidate) {
-                    socketio.emit("publish", JSON.stringify(
-                        {
-                            type: "candidate",
-                            dest: new_user,
-                            src: local_id,
-                            candidate: ev.candidate
-                        })
-                    )
-                } else {
-                    remotes[new_user].count = 0;
-                }
-            }
-            remotes[new_user].peer.ontrack = function (ev) {
-                console.log(`ontrack ev=${JSON.stringify(ev)}`);
-
-                if (ev.streams && ev.streams[0]) {
-                    remotes[new_user].obj.show(ev);
-
-                    console.log(`from ${new_user} ontrack ev=${JSON.stringify(ev.streams[0])}`);
-                    LOG({
-                        id: local_id,
-                        func: "ontrack",
-                        text: `from ${new_user} ontrack ev=${JSON.stringify(ev.streams[0])}`
-                    })
-                }
-            }
-
-            remotes[new_user].peer.onsignalingstatechange = function (ev) {
-                LOG({
-                    func: "onsignalingstatechange",
-                    text: remotes[new_user].peer.signalingState
-                });
-            }
-
-            remotes[new_user].count = 0;
             remotes[new_user].peer.onnegotiationneeded = function (ev) {
                 console.log(`count=${remotes[new_user].count}`);
 
@@ -299,6 +278,7 @@ socketio.on("renew", function (msg) {
                         );
                         remotes[new_user].obj.$spiner.style.display = "none";
                         remotes[new_user].obj.$media.style.display = "none";
+                        remotes[new_user].obj.$record_btn.style.display = "none";
                     }
 
                 } else {
@@ -444,6 +424,43 @@ socketio.on("publish", function (msg) {
 })
 
 init();
+
+function on_signalingstatechange(new_user) {
+    return function (ev) {
+        LOG({
+            func: "onsignalingstatechange",
+            text: remotes[new_user].peer.signalingState
+        });
+    };
+}
+
+function on_track(new_user) {
+    return function (ev) {
+        console.log(`ontrack ev=${JSON.stringify(ev)}`);
+        if (ev.streams && ev.streams[0]) {
+            remotes[new_user].obj.show(ev);
+            console.log(`from ${new_user} ontrack ev=${JSON.stringify(ev.streams[0])}`);
+            LOG({
+                func: "ontrack",
+                text: `from ${new_user} ontrack ev=${JSON.stringify(ev.streams[0])}`
+            });
+        }
+    };
+}
+
+function on_icecandidate(new_user) {
+    return function (ev) {
+        console.log(`onicecandidate:ev=${JSON.stringify(ev)}`);
+        if (ev.candidate) {
+            socketio.emit("publish", JSON.stringify({
+                type: "candidate",
+                dest: new_user,
+                src: local_id,
+                candidate: ev.candidate
+            }));
+        }
+    };
+}
 
 function delete_remote(remote_id) {
     console.log(`${arguments.callee.name}: delete ${remote_id}`);

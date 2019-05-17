@@ -37,10 +37,8 @@ function initAudioContext() {
     audioCtx.createBufferSource().start();
 }
 
-
 const login = function () {
-    const $login_dialog = new Create_dialog(document.body);
-    $login_dialog.on_click(function (ev) {
+    const $login_dialog = new Create_dialog(document.body, function (ev) {
 
         local_id = $login_dialog.get_value();
         $local_name.innerText = local_id;
