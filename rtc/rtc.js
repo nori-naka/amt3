@@ -218,10 +218,11 @@ const start_video_to = function (remote) {
 }
 
 const stop_video_to = function (remote) {
-    remote.peer.removeTrack(remote.video_sender)
+    if (remote.video_sender) {
+        remote.peer.removeTrack(remote.video_sender)
+    }
     delete remote.video_sender;
 }
-
 
 const start_audio_to = function (remote) {
     if (!remote.audio_sender) {
