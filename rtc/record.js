@@ -12,48 +12,28 @@ const Record = function ($video, $start_btn, $playback_video, $playback_btn) {
     this.$playback_video = $playback_video;
     this.$playback_btn = $playback_btn;
 
-    this.chunks = []; // 録画データを保持する
     this.blobUrl = null;
 
-    this.$start_btn.onclick = function (click_event) {
+    this.recorder = new MediaRecorder(this.$video.srcObject);
+    this.recorder.ondataavailable = function (ev) {
+        this.blobUrl = URL.createObjectURL(new Blob([ev.data], { type: "video/webm" }))
+
+        let a = document.createElement("a");
+        a.href = this.blobUrl;
+        a.download = `${local_id}_${Date.now()}.webm`;
+        a.click();
+        URL.revokeObjectURL(this.blobUrl);
+    }
+
+    this.$start_btn.onclick = function (ev) {
         if (self.$start_btn.innerText == "REC") {
-            self.recorder = new MediaRecorder(self.$video.srcObject, options);
-            self.recorder.ondataavailable = function (ev) {
-                self.chunks.push(ev.data);
-            }
-            self.recorder.start(1000); // 1000ms period
+            self.recorder.start();
             self.$start_btn.innerText = "STOP";
         } else {
-            self.stop();
+            self.recorder.stop();
             self.$start_btn.innerText = "REC";
         }
-        // click_event.preventDefault();
-    };
-}
-
-Record.prototype.start = function () {
-    LOG({ func: `Record start`, text: `${this.recorder.state}` });
-    console.log(`Record start : ${this.recorder.state}`);
-    this.recorder.ondataavailable = function (ev) {
-        self.chunks.push(ev.data);
-    };
-    this.recorder.start(1000); // 1000ms period
-}
-
-Record.prototype.stop = function () {
-    LOG({ func: `Record stop`, text: `${this.recorder.state}` });
-    console.log(`Record stop : ${this.recorder.state}`);
-
-    this.recorder.stop();
-
-    this.blobUrl = window.URL.createObjectURL(new Blob(this.chunks, { type: "video/webm" }));
-    this.chunks = [];
-
-    let a = document.createElement("a");
-    a.href = this.blobUrl;
-    a.download = `video_${Date.now()}.webm`;
-    a.click();
-    window.URL.revokeObjectURL(this.blobUrl);
+    }
 }
 
 Record.prototype.play = function () {

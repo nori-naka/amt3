@@ -33,6 +33,10 @@ const Create_dialog = function (parent, a_func) {
     });
 
     this.input_text = document.getElementById("input");
+    this.input_text.addEventListener("change", function (ev) {
+        a_func(ev);
+        self.elm.style.display = "none";
+    });
 
 }
 
