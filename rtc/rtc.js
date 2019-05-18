@@ -10,6 +10,10 @@ let local_stream = null;
 // let audioCtx;
 let local_level_meter;
 
+let i_send_hello = false;
+let i_recive_hello = false;
+let i_recive_vedio_start = false;
+
 //-----------------------------------------
 const LOG = function (msg) {
     socketio.emit("log", {
@@ -186,13 +190,17 @@ socketio.on("renew", function (msg) {
                 remotes[new_user].peer.onnegotiationneeded = on_negotiationneeded(new_user);
                 remotes[new_user].obj.$user_title.onclick = on_click(new_user);
 
-                socketio.emit("publish", JSON.stringify(
-                    {
-                        type: "hello",
-                        dest: new_user,
-                        src: local_id,
-                    })
-                );
+				if (!i_recive_hello) {
+					socketio.emit("publish", JSON.stringify(
+						{
+							type: "hello",
+							dest: new_user,
+							src: local_id,
+						})
+                	);
+					i_send_hello = true;
+				}
+
             })
         }
     });
@@ -244,7 +252,9 @@ socketio.on("publish", function (msg) {
 
     } else if (data.dest == local_id) {
         if (data.type == "hello") {
-
+			i_recive_hello = true;
+			if (i_send_hello && data.src > local_id) return;
+			
             socketio.emit("publish", JSON.stringify(
                 {
                     type: "hello-hello",
@@ -254,6 +264,8 @@ socketio.on("publish", function (msg) {
             );
 
         } else if (data.type == "hello-hello") {
+			i_recive_hello = false;
+			i_send_hello = false;
 
             if (remotes[data.src] && !remotes[data.src].audio_sender) {
                 if (remotes[data.src].peer.signalingState == "stable") {
@@ -263,6 +275,10 @@ socketio.on("publish", function (msg) {
             }
 
         } else if (data.type == "offer") {
+			i_recive_hello = false;
+			i_recive_vedio_start = false;
+			i_send_hello = false;
+			
             const remote_sdp = new RTCSessionDescription(data.sdp);
             remotes[data.src].peer.setRemoteDescription(remote_sdp)
                 .then(function () {
@@ -308,6 +324,7 @@ socketio.on("publish", function (msg) {
             remotes[data.src].peer.addIceCandidate(candidate);
 
         } else if (data.type == "video_start") {
+			i_recive_vedio_start = true;
             start_video_to(remotes[data.src]);
 
         } else if (data.type == "video_stop") {
@@ -318,6 +335,8 @@ socketio.on("publish", function (msg) {
 })
 
 function on_click(new_user) {
+	if (i_recive_vedio_start) return;
+	
     return function (ev) {
         remotes[new_user].obj.$spiner.style.display = "inline-block";
         const stream = remotes[new_user].obj.$media.srcObject;
