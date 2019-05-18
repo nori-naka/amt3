@@ -10,8 +10,8 @@ let local_stream = null;
 // let audioCtx;
 let local_level_meter;
 
-let i_send_hello = false;
-let i_recive_hello = false;
+// let i_send_hello = false;
+// let i_recive_hello = false;
 let i_recive_vedio_start = false;
 
 //-----------------------------------------
@@ -190,16 +190,26 @@ socketio.on("renew", function (msg) {
                 remotes[new_user].peer.onnegotiationneeded = on_negotiationneeded(new_user);
                 remotes[new_user].obj.$user_title.onclick = on_click(new_user);
 
-				if (!i_recive_hello) {
-					socketio.emit("publish", JSON.stringify(
-						{
-							type: "hello",
-							dest: new_user,
-							src: local_id,
-						})
-                	);
-					i_send_hello = true;
-				}
+                // if (!i_recive_hello) {
+                //     socketio.emit("publish", JSON.stringify(
+                //         {
+                //             type: "hello",
+                //             dest: new_user,
+                //             src: local_id,
+                //         })
+                //     );
+                //     i_send_hello = true;
+                // }
+
+                remotes[new_user].interval_id = setInterval(function () {
+                    socketio.emit("publish", JSON.stringify(
+                        {
+                            type: "hello",
+                            dest: new_user,
+                            src: local_id,
+                        })
+                    );
+                }, 1000);
 
             })
         }
@@ -248,13 +258,21 @@ socketio.on("publish", function (msg) {
 
     if (!local_id || !remotes[data.src]) {
 
-        if (data.type == "hello") return;
+        if (data.type == "hello") {
+            return;
+        }
 
     } else if (data.dest == local_id) {
+
         if (data.type == "hello") {
-			i_recive_hello = true;
-			if (i_send_hello && data.src > local_id) return;
-			
+
+            // i_recive_hello = true;
+            // if (i_send_hello) return;
+
+            if (remotes[data.src].interval_id) {
+                clearInterval(remotes[data.src].interval_id);
+            }
+
             socketio.emit("publish", JSON.stringify(
                 {
                     type: "hello-hello",
@@ -262,10 +280,15 @@ socketio.on("publish", function (msg) {
                     src: local_id,
                 })
             );
+            console.log(`${local_id} -> ${data.src} send hello-hello`)
 
         } else if (data.type == "hello-hello") {
-			i_recive_hello = false;
-			i_send_hello = false;
+            // i_recive_hello = false;
+            // i_send_hello = false;
+
+            if (remotes[data.src].interval_id) {
+                clearInterval(remotes[data.src].interval_id);
+            }
 
             if (remotes[data.src] && !remotes[data.src].audio_sender) {
                 if (remotes[data.src].peer.signalingState == "stable") {
@@ -275,10 +298,10 @@ socketio.on("publish", function (msg) {
             }
 
         } else if (data.type == "offer") {
-			i_recive_hello = false;
-			i_recive_vedio_start = false;
-			i_send_hello = false;
-			
+            // i_recive_hello = false;
+            // i_send_hello = false;
+            i_recive_vedio_start = false;
+
             const remote_sdp = new RTCSessionDescription(data.sdp);
             remotes[data.src].peer.setRemoteDescription(remote_sdp)
                 .then(function () {
@@ -286,19 +309,22 @@ socketio.on("publish", function (msg) {
                     remotes[data.src].obj.$name.style.color = "green";
                     start_audio_to(remotes[data.src]);
 
-                    console.log(`socket_on offer: createAnswer`);
-                    LOG({ func: "offer", text: "createAnswer" });
+                    console.log(`${data.src} -> ${local_id} socket_on offer: createAnswer`);
+                    LOG({ func: "offer", text: `${data.src} -> ${local_id} createAnswer` });
 
                     return remotes[data.src].peer.createAnswer();
                 })
                 .then(function (answer) {
                     console.log(`socket_on offer: setLocalDescription answer`);
-                    LOG({ func: "offer", text: "setLocalDescription" });
+                    LOG({ func: "offer", text: `${data.src} -> ${local_id} setLocalDescription` });
 
                     const local_sdp = new RTCSessionDescription(answer);
                     return remotes[data.src].peer.setLocalDescription(local_sdp);
                 })
                 .then(function () {
+                    console.log(`socket_on offer: send answer`);
+                    LOG({ func: "offer", text: `${local_id} -> ${data.src} send answer` });
+
                     socketio.emit("publish", JSON.stringify(
                         {
                             type: "answer",
@@ -324,7 +350,7 @@ socketio.on("publish", function (msg) {
             remotes[data.src].peer.addIceCandidate(candidate);
 
         } else if (data.type == "video_start") {
-			i_recive_vedio_start = true;
+            i_recive_vedio_start = true;
             start_video_to(remotes[data.src]);
 
         } else if (data.type == "video_stop") {
@@ -335,8 +361,8 @@ socketio.on("publish", function (msg) {
 })
 
 function on_click(new_user) {
-	if (i_recive_vedio_start) return;
-	
+    if (i_recive_vedio_start) return;
+
     return function (ev) {
         remotes[new_user].obj.$spiner.style.display = "inline-block";
         const stream = remotes[new_user].obj.$media.srcObject;
