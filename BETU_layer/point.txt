@@ -1,0 +1,7 @@
+{"lon":139.514626, "lat":35.87538, "text": "<h3>ここは東京</h3>"},
+{"lon":138.514626, "lat":36.87538, "text": "<h3>ここは新潟あたり</h3>"},
+{"lon":137.514626, "lat":35.87538, "text": "<h3>ここは岐阜かなぁ</h3>"},
+{"lon":140.514626, "lat":36.87538,
+    "text": "<p>ここは別の場所<p>とっても遠い別の場所です<p><button id='b1' onclick='BETU_layer.show_detail();'>詳細</button>",
+    "detail_title": "詳細タイトル", 
+    "detail_text": "<p>詳細詳細。<p>詳細詳細。</p><p>詳細詳細。</p><p>詳細詳細。<button id='b2' onclick='BETU_layer.close_detail();'>閉じる</button>"}

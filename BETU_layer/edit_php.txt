@@ -1,0 +1,88 @@
+<div class="area">
+<button id="regist" class="button single control">登録</button>
+    <input type="hidden" id="no">
+<table>
+<tbody>
+ <tr>
+  <th>事務所</th>
+  <td><select id="kikan2"><option value="1">羽越河川国道事務所</option></select></td>
+ </tr>
+ <tr>
+  <th>出張所</th>
+  <td><select id="kikan3"><option value="1">村上国道維持出張所</option></select></td>
+ </tr>
+ <tr>
+  <th>事象区分</th>
+  <td><select id="kbn"><option value="0">通常</option><option value="1">災害</option></select></td>
+ </tr>
+ <tr>
+  <th>発見日時<span class="red">（必須）</span></th>
+  <td><input type="datetime-local" id="date" value="2018-11-02T16:31"></td>
+ </tr>
+ <tr>
+  <th>路線</th>
+  <td><select id="road"><option value="700">７号現道</option><option value="1900">日東道</option><option value="999900">その他</option></select></td>
+ </tr>
+ <tr>
+  <th>上下区分</th>
+  <td><select id="updown"><option value="1">上り</option><option value="2">下り</option><option value="3">上下</option></select></td>
+ </tr>
+ <tr>
+  <th>道路区分</th>
+  <td><select id="douro"><option value="1">車道</option><option value="2">路肩</option><option value="3">歩道</option><option value="4">歩車道</option><option value="5">自転車道</option><option value="6">自歩道</option><option value="7">中央分離帯</option><option value="8">側道</option><option value="9">橋梁・高架下</option><option value="10">管理外</option><option value="11">道路全体</option><option value="12">路側</option><option value="13">出入り口</option><option value="14">坂路</option><option value="15">斜路</option><option value="16">施設関係</option><option value="17">ランプ</option><option value="18">停車帯</option><option value="19">避譲車線</option><option value="20">副道</option><option value="21">付加車線</option><option value="22">登坂車線</option><option value="23">ゆずり斜線</option><option value="24">追い越し車線</option><option value="25">法面</option><option value="26">点検路</option><option value="27">通路</option><option value="28">その他</option><option value="29">待避所</option><option value="30">２期線側</option></select></td>
+ </tr>
+ <tr>
+  <th>地先名等</th>
+  <td><input type="text" id="tisaki" maxlength="50"></td>
+ </tr>
+ <tr>
+  <th>事象位置<span class="red">（必須）</span></th>
+  <td><button type="button" id="coordinate">位置指定</button><input type="hidden" id="jisyou_type"><input type="hidden" id="latitude"><input type="hidden" id="longitude"></td>
+ </tr>
+ <tr>
+  <th>施設<span class="red">（必須）</span></th>
+  <td><select id="sisetu"><option value=""></option><option value="1">道路</option><option value="2">排水</option><option value="3">安全施設</option><option value="4">構造物</option><option value="5">工事</option><option value="6">その他</option></select></td>
+ </tr>
+ <tr>
+  <th>分類<span class="red">（必須）</span></th>
+  <td><select id="bunrui"><option value=""></option></select></td>
+ </tr>
+ <tr>
+  <th>対象<span class="red">（必須）</span></th>
+  <td><select id="taisyou"><option value=""></option></select></td>
+ </tr>
+ <tr>
+  <th>状況<span class="red">（必須）</span></th>
+  <td><select id="jokyou"><option value=""></option></select></td>
+ </tr>
+ <tr>
+  <th>措置作業内容</th>
+  <td><select id="syoti"></select></td>
+ </tr>
+ <tr>
+  <th>計測項目</th>
+  <td><div id="keisoku_area"><table></table></div></td>
+ </tr>
+ <tr>
+  <th>措置作業方針</th>
+  <td><input type="checkbox" id="syotizumi" value="1">未対応<select id="taiou"><option value="" selected=""></option><option value="処置済み">処置済み</option><option value="作業指示を行う">作業指示を行う</option><option value="指示予定">指示予定</option><option value="状況監視を行う">状況監視を行う</option><option value="再度現地を確認">再度現地を確認</option></select></td>
+ </tr>
+ <tr>
+  <th>措置済確認日</th>
+  <td><input type="date" id="date_syoti"></td>
+ </tr>
+ <tr>
+  <th>対応内容</th>
+  <td><input type="text" id="taiou_bikou" maxlength="50"></td>
+ </tr>
+ <tr>
+  <th>備考</th>
+  <td><textarea id="bikou" maxlength="120"></textarea></td>
+ </tr>
+ <tr>
+  <th>関連画像・写真</th>
+  <td><div id="photo_area"></div><button class="addphoto">追加</button><input type="file" class="photo_input" accept=".jpg,.png,.gif,.jpeg" style="display:none"></td>
+ </tr>
+</tbody>
+</table>
+</div>

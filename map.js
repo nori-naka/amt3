@@ -362,6 +362,7 @@ function showMap() {
     initDraw();
     initFreeErase();
 
+    let undo_func = null;
     map.on("click", function (e) {
 
         if (eraseMode) {
@@ -371,6 +372,11 @@ function showMap() {
         if (sizeMode) {
             sizeBtnEnd();
             return;
+        }
+
+        if (undo_func) {
+            undo_func();
+            undo_func = null;
         }
 
         let iconClick = false;

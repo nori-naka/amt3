@@ -29,33 +29,57 @@ var allDraw = [];
 var server = require("https").createServer(options, function (req, res) {
     var urlParse = url.parse(req.url, true);
 
-    var filePath;
-    if (urlParse.pathname == '/') {
-        filePath = '/index.html';
-    } else {
-        filePath = urlParse.pathname;
-    }
-    //console.log("req.url=" + req.url);
-    //console.log("filePath=" + filePath);
-    //console.log(JSON.stringify(urlParse));
+    if (req.method == "POST") {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
 
-    var fullPath = __dirname + filePath;
-    fs.readFile(fullPath, function (err, data) {
-        if (err) {
-            console.log("NO FILE: " + filePath);
-            res.writeHead(500);
-            res.end('Error loading ' + filePath);
+        var postData = '';
+        req.on('data', function (chunk) {
+            postData += chunk;
+        }).on('end', function () {
+            const data = JSON.parse(postData);
+
+            var result = window.atob(data.blob.replace(/^.*,/, ''));
+        })
+
+        // POSTデータの構成
+        // {
+        //     name: `${local_id}_${Date.now()}.webm`,
+        //     lat: position.lat,
+        //     lng: position.lng,
+        //     date: new Date().toLocaleString(),
+        //     blob: b64
+        // }
+
+
+    } else {// GET
+        var filePath;
+        if (urlParse.pathname == '/') {
+            filePath = '/index.html';
         } else {
-            res.writeHead(200, {
-                "Content-Type": mime[path.extname(fullPath)] || "text/html",
-                "Access-Control-Allow-Origin": "*"
-            });
-            if (urlParse.pathname == "/index.html" && urlParse.query.user_id) {
-                data = data.toString().replace("initial_user_id", urlParse.query.user_id);
-            }
-            res.end(data);
+            filePath = urlParse.pathname;
         }
-    });
+        //console.log("req.url=" + req.url);
+        //console.log("filePath=" + filePath);
+        //console.log(JSON.stringify(urlParse));
+
+        var fullPath = __dirname + filePath;
+        fs.readFile(fullPath, function (err, data) {
+            if (err) {
+                console.log("NO FILE: " + filePath);
+                res.writeHead(500);
+                res.end('Error loading ' + filePath);
+            } else {
+                res.writeHead(200, {
+                    "Content-Type": mime[path.extname(fullPath)] || "text/html",
+                    "Access-Control-Allow-Origin": "*"
+                });
+                if (urlParse.pathname == "/index.html" && urlParse.query.user_id) {
+                    data = data.toString().replace("initial_user_id", urlParse.query.user_id);
+                }
+                res.end(data);
+            }
+        });
+    }
 }).listen(process.env.PORT || PORT);
 var io = require("socket.io").listen(server);
 

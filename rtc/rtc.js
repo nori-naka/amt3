@@ -5,14 +5,17 @@ const $local_name = document.getElementById("local_name");
 const $local_elm = document.getElementById("local_elm");
 const $remote = document.getElementById("remote");
 const remotes = {};
+
 let local_id = null;
 let local_stream = null;
+const regist_que = [];
+
 // let audioCtx;
 let local_level_meter;
 
 // let i_send_hello = false;
 // let i_recive_hello = false;
-let i_recive_vedio_start = false;
+// let i_recive_vedio_start = false;
 
 //-----------------------------------------
 const LOG = function (msg) {
@@ -126,11 +129,11 @@ Create_elm.prototype.show = function (ev) {
         this.$media.style.display = "block";
         this.$media.play();
 
-        this.record = new Record(this.$media, this.$record_btn, this.$a_media);
-        this.$record_btn.style.display = "block";
-
         // ロードスピナーを消す
         this.$spiner.style.display = "none";
+
+        this.record = new Record(this.$media, this.$record_btn, this.$a_media);
+        this.$record_btn.style.display = "block";
     }
     this.$audio.srcObject = ev.streams[0];
     this.$audio.play();
@@ -149,69 +152,70 @@ Create_elm.prototype.on = function (event, handler) {
     this.$user_title.addEventListener(event, handler);
 }
 
+const create_remote = function (new_user, a_func) {
+    new Promise(function (resolve, reject) {
+        remotes[new_user] = {};
+        remotes[new_user].obj = new Create_elm(new_user, $remote, "");
+
+        resolve();
+    }).then(function () {
+        remotes[new_user].elm = remotes[new_user].obj.get_elm();
+        remotes[new_user].peer = new RTCPeerConnection({
+            //sdpSemantics : "unified-plan",
+            sdpSemantics: "plan-b",
+            iceServers: [
+                { urls: "stun:stun.stunprotocol.org" },
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:23.21.150.121' },
+                { urls: "turn:numb.viagenie.ca", credential: "jrc@numb", username: "noriaki.nakamura@gmail.com" }
+            ]
+        });
+        // 初期化時
+        LOG({
+            func: "onsignalingstatechange　-- initial",
+            text: remotes[new_user].peer.signalingState
+        });
+
+        remotes[new_user].peer.onicecandidate = on_icecandidate(new_user);
+        remotes[new_user].peer.ontrack = on_track(new_user);
+        remotes[new_user].peer.onsignalingstatechange = on_signalingstatechange(new_user);
+        remotes[new_user].peer.onnegotiationneeded = on_negotiationneeded(new_user);
+        remotes[new_user].obj.$user_title.onclick = on_click(new_user);
+
+    }).then(function () {
+        regist_que.forEach(function (remote_id) {
+            if (remote_id == new_user) {
+                start_audio_to(remotes[new_user]);
+            }
+        })
+    })
+}
+
+socketio.on("regist", function (msg) {
+    console.log("SOCKET ON REGIST: " + msg);
+
+    if (!local_id) return;
+
+    const data = JSON.parse(msg);
+    const remote_id = data.id;
+
+    regist_que.push(remote_id);
+    console.log(`remote_id=${remote_id} regist_que=${regist_que}`)
+    LOG({ func: "regist", text: `remote_id=${remote_id} regist_que=${regist_que}`})
+});
+
 socketio.on("renew", function (msg) {
     //console.log(`renew=${msg}`)
     const data = JSON.parse(msg);
 
-    if (!local_id) return;
-    if (!local_stream) return;
+    // if (!local_id) return;
+    // if (!local_stream) return;
 
     const cur_users = Object.keys(remotes)
 
     Object.keys(data).forEach(function (new_user) {
         if (!cur_users.includes(new_user) && new_user != local_id) {
-
-            new Promise(function (resolve, reject) {
-                remotes[new_user] = {};
-                remotes[new_user].obj = new Create_elm(new_user, $remote, "");
-
-                resolve();
-            }).then(function () {
-                remotes[new_user].elm = remotes[new_user].obj.get_elm();
-                remotes[new_user].peer = new RTCPeerConnection({
-                    //sdpSemantics : "unified-plan",
-                    sdpSemantics: "plan-b",
-                    iceServers: [
-                        { urls: "stun:stun.stunprotocol.org" },
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:23.21.150.121' },
-                        { urls: "turn:numb.viagenie.ca", credential: "jrc@numb", username: "noriaki.nakamura@gmail.com" }
-                    ]
-                });
-                // 初期化時
-                LOG({
-                    func: "onsignalingstatechange　-- initial",
-                    text: remotes[new_user].peer.signalingState
-                });
-
-                remotes[new_user].peer.onicecandidate = on_icecandidate(new_user);
-                remotes[new_user].peer.ontrack = on_track(new_user);
-                remotes[new_user].peer.onsignalingstatechange = on_signalingstatechange(new_user);
-                remotes[new_user].peer.onnegotiationneeded = on_negotiationneeded(new_user);
-                remotes[new_user].obj.$user_title.onclick = on_click(new_user);
-
-                // if (!i_recive_hello) {
-                //     socketio.emit("publish", JSON.stringify(
-                //         {
-                //             type: "hello",
-                //             dest: new_user,
-                //             src: local_id,
-                //         })
-                //     );
-                //     i_send_hello = true;
-                // }
-
-                remotes[new_user].interval_id = setInterval(function () {
-                    socketio.emit("publish", JSON.stringify(
-                        {
-                            type: "hello",
-                            dest: new_user,
-                            src: local_id,
-                        })
-                    );
-                }, 1000);
-
-            })
+            create_remote(new_user);
         }
     });
 
@@ -220,32 +224,36 @@ socketio.on("renew", function (msg) {
             delete_remote(cur_user);
         }
     })
+
+    // ログイン後、最初のリスト通知受領後に、registを送信する。
+    if (first_flag) {
+        socketio.emit("regist", local_id);
+        first_flag = false;
+        console.log(`first_flag=${first_flag} send regist`)
+        LOG({func:"renew", text:`first_flag=${first_flag} send regist`})
+    }
+
 });
 
 
 const start_video_to = function (remote) {
-    if (remote.video_sender) {
-        // 既に接続済みで
-        if (remote.video_sender.track) {
-            // trackがある場合には一旦削除して
-            remote.peer.removeTrack(remote.video_sender)
-        }
-        delete remote.video_sender;
-    }
-    remote.video_sender = remote.peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
+
+    remote.peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
 }
 
 const stop_video_to = function (remote) {
-    if (remote.video_sender) {
-        remote.peer.removeTrack(remote.video_sender)
-    }
-    delete remote.video_sender;
+    LOG({ func: "stop_video_to", text: `remote.video_sender=${remote.video_sender}` })
+
+    remote.peer.getSenders().forEach(function (sender) {
+        remote.peer.removeTrack(sender)
+    });
 }
 
 const start_audio_to = function (remote) {
     if (!remote.audio_sender) {
         // 未接続の場合にはtrackの追加
         remote.audio_sender = remote.peer.addTrack(local_stream.getAudioTracks()[0], local_stream);
+        remote.obj.$name.style.color = "green";
     }
 }
 
@@ -267,7 +275,7 @@ socketio.on("publish", function (msg) {
         if (data.type == "hello") {
 
             // i_recive_hello = true;
-            // if (i_send_hello) return;
+            if (i_send_hello && data.src > local_id) return;
 
             if (remotes[data.src].interval_id) {
                 clearInterval(remotes[data.src].interval_id);
@@ -284,7 +292,7 @@ socketio.on("publish", function (msg) {
 
         } else if (data.type == "hello-hello") {
             // i_recive_hello = false;
-            // i_send_hello = false;
+            i_send_hello = false;
 
             if (remotes[data.src].interval_id) {
                 clearInterval(remotes[data.src].interval_id);
@@ -297,17 +305,20 @@ socketio.on("publish", function (msg) {
                 }
             }
 
+        } else if (data.type == "reconnect") {
+
+            delete_remote(data.src);
+
         } else if (data.type == "offer") {
             // i_recive_hello = false;
             // i_send_hello = false;
-            i_recive_vedio_start = false;
-
+            // i_recive_vedio_start = false;
+            
             const remote_sdp = new RTCSessionDescription(data.sdp);
             remotes[data.src].peer.setRemoteDescription(remote_sdp)
                 .then(function () {
 
-                    remotes[data.src].obj.$name.style.color = "green";
-                    start_audio_to(remotes[data.src]);
+                    // start_audio_to(remotes[data.src]);
 
                     console.log(`${data.src} -> ${local_id} socket_on offer: createAnswer`);
                     LOG({ func: "offer", text: `${data.src} -> ${local_id} createAnswer` });
@@ -337,8 +348,18 @@ socketio.on("publish", function (msg) {
                 .catch(function (err) {
                     console.log(`signal: ${err} delete user: ${data.src}`);
                     LOG({ func: "offer", text: `err=${err}` });
+                    // delete_remote(data.src);
+                    socketio.emit("publish", JSON.stringify(
+                        {
+                            type: "reconnect",
+                            dest: data.src,
+                            src: local_id,
+                        })
+                    );
+                    delete_remote(data.src);
 
                 });
+            
         } else if (data.type == "answer") {
 
             const remote_sdp = new RTCSessionDescription(data.sdp);
@@ -350,24 +371,37 @@ socketio.on("publish", function (msg) {
             remotes[data.src].peer.addIceCandidate(candidate);
 
         } else if (data.type == "video_start") {
-            i_recive_vedio_start = true;
-            start_video_to(remotes[data.src]);
+            const senders = remotes[data.src].peer.getSenders();
+            if (senders) {
+                senders.forEach(function (sender) {
+                    if (sender.track.kind == "video") {
+                        remotes[data.src].peer.removeTrack(sender)
+                    }
+                });
+            }
+            remotes[data.src].peer.addTrack(local_stream.getVideoTracks()[0], local_stream);
 
         } else if (data.type == "video_stop") {
-            stop_video_to(remotes[data.src]);
-
+            remotes[data.src].peer.getSenders().forEach(function (sender) {
+                if (sender.track.kind == "video") {
+                    remotes[data.src].peer.removeTrack(sender)                    
+                }
+            });
         }
     }
 })
 
 function on_click(new_user) {
-    if (i_recive_vedio_start) return;
+    // if (i_recive_vedio_start) return;
 
     return function (ev) {
         remotes[new_user].obj.$spiner.style.display = "inline-block";
         const stream = remotes[new_user].obj.$media.srcObject;
+        LOG({ func: "on_click", text: `stream=${stream}` })
+
         if (stream) {
             tracks = stream.getVideoTracks();
+            LOG({ func: "on_click", text: `tracks=${tracks.length}` })
             if (tracks.length == 0) {
                 // 接続数が０の場合(切断状態)
                 socketio.emit("publish", JSON.stringify({
@@ -403,7 +437,6 @@ function on_click(new_user) {
 
 function on_negotiationneeded(new_user) {
     return function (ev) {
-        console.log(`count=${remotes[new_user].count}`);
         if (remotes[new_user].peer.signalingState == "stable") {
             console.log(`signalingState=${remotes[new_user].peer.signalingState}`);
             // ---------- LOG to server -------------------
@@ -451,6 +484,12 @@ function on_track(new_user) {
         console.log(`ontrack ev=${JSON.stringify(ev)}`);
         if (ev.streams && ev.streams[0]) {
             remotes[new_user].obj.show(ev);
+
+            console.log(`remotes[new_user].audio_sender=${remotes[new_user].audio_sender}`)
+            if (!remotes[new_user].audio_sender) {
+                console.log("HEEEEEEEEE!");
+                start_audio_to(remotes[new_user]);
+            }
             console.log(`from ${new_user} ontrack ev=${JSON.stringify(ev.streams[0])}`);
             LOG({
                 func: "ontrack",
@@ -476,7 +515,9 @@ function on_icecandidate(new_user) {
 
 function delete_remote(remote_id) {
     console.log(`${arguments.callee.name}: delete ${remote_id}`);
-    remotes[remote_id].obj.delete();
+    if (remotes[remote_id].obj) {
+        remotes[remote_id].obj.delete();
+    }
     delete remotes[remote_id].peer;
     delete remotes[remote_id];
 }

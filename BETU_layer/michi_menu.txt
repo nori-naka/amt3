@@ -1,0 +1,21 @@
+<!-- 巡回実施 -->
+<fieldset>
+ <legend>巡回実施</legend>
+ <button class="button single invalid">通常巡回<br> </button>
+ <button class="button single invalid">災害巡回<br>（地震等）</button>
+ <button class="button single" id="edit_php" onclick='BETU_layer.go_edit_php();'>事象登録<br>（行政相談等）</button>
+</fieldset>
+
+<!-- 巡回日誌 -->
+<fieldset>
+ <legend>巡回日誌</legend>
+ <button class="button single" data-action="link" data-href="edit.php">巡回日誌の表示</button>
+</fieldset>
+
+<!-- その他 -->
+<fieldset>
+ <legend>その他</legend>
+ <button class="button single invalid">巡回記録の修正</button>
+ <button class="button single invalid">巡回記録の保存</button>
+ <button class="button single invalid">引き継ぎメモ作成</button>
+</fieldset>

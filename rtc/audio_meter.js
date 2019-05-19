@@ -8,6 +8,7 @@ const requestAnimationFrame = window.requestAnimationFrame ||
 // AudioNodeを管理するAudioContextの生成
 const Audio_meter = function (stream, canvas_elm, bar_color) {
 
+	this.stream = stream;
 	this.c = canvas_elm;
 	this.ctx = this.c.getContext('2d');
 
@@ -18,7 +19,7 @@ const Audio_meter = function (stream, canvas_elm, bar_color) {
 	}
 
 	try {
-		this.inputNode = audioCtx.createMediaStreamSource(stream);
+		this.inputNode = audioCtx.createMediaStreamSource(this.stream);
 		this.analyserNode = audioCtx.createAnalyser();
 		this.inputNode.connect(this.analyserNode);
 		//stream.removeTrack(stream.getAudioTracks()[0]);
