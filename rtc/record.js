@@ -3,27 +3,24 @@ const options = {
     mimeType: 'video/webm; codecs=vp9'
 };
 
-let b64;
 
-const reader = new FileReader();
-reader.onload = function () {
-    b64 = reader.result;
-    // console.log(b64);
-}
+// const upload = function (json_data) {
+//     const url = "/movie/";
+//     fetch(url, {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json; charset=utf-8",
+//         },
+//         body: JSON.stringify(json_data), // 本文のデータ型は "Content-Type" ヘッダーと一致する必要があります
+//     }).then(function (response) {
+//         return response.json();
+//     }).then(function (json) {
+//         console.log(JSON.stringify(json));
+//     });
+// }
 
 const upload = function (json_data) {
-    const url = "/movie/";
-    fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(json_data), // 本文のデータ型は "Content-Type" ヘッダーと一致する必要があります
-    }).then(function (response) {
-        return response.json();
-    }).then(function (json) {
-        console.log(JSON.stringify(json));
-    });
+    socketio.emit("file", JSON.stringify(json_data));
 }
 
 
@@ -40,22 +37,38 @@ const Record = function ($video, $start_btn, $playback_video, $playback_btn) {
     this.recorder = new MediaRecorder(this.$video.srcObject);
     this.recorder.ondataavailable = function (ev) {
 
-        this.blobUrl = URL.createObjectURL(new Blob([ev.data], { type: "video/webm" }))
+        // this.blobUrl = URL.createObjectURL(new Blob([ev.data], { type: "video/webm" }))
 
-        let a = document.createElement("a");
-        a.href = this.blobUrl;
-        a.download = `${local_id}_${Date.now()}.webm`;
-        a.click();
-        URL.revokeObjectURL(this.blobUrl);
+        // let a = document.createElement("a");
+        // a.href = this.blobUrl;
+        // a.download = `${local_id}_${Date.now()}.webm`;
+        // a.click();
+        // URL.revokeObjectURL(this.blobUrl);
 
-        reader.readAsDataURL(new Blob([ev.data], { type: "video/webm" }));
-        upload({
-            name: `${local_id}_${Date.now()}.webm`,
-            lat: position.lat,
-            lng: position.lng,
-            date: new Date().toLocaleString(),
-            blob: b64
-        });
+
+        var blob = new Blob([ev.data], { type: "video/webm" });
+        var reader = new FileReader();
+        reader.onload = function () {
+            var b64 = reader.result;
+            console.log(b64);
+            upload({
+                name: `${local_id}_${Date.now()}.webm`,
+                lat: position.lat,
+                lng: position.lng,
+                date: new Date().toLocaleString(),
+                blob: b64
+            });
+
+        }
+        reader.readAsDataURL(blob);
+
+        // const reader = new FileReader();
+        // reader.onload = function () {
+        //     b64 = reader.result;
+        //     console.log(b64);
+        // }
+        // reader.readAsDataURL(new Blob([ev.data], { type: "video/webm" }));
+
     }
 
     this.$start_btn.onclick = function (ev) {

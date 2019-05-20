@@ -23,9 +23,10 @@ var options = {
 
 const getUniqueId = getUniqueIdMaker();
 
+var urlParse;
 // サーバの初期化
 var server = require("https").createServer(options, function (req, res) {
-    var urlParse = url.parse(req.url, true);
+    urlParse = url.parse(req.url, true);
 
     var filePath;
     if (urlParse.pathname == '/') {
@@ -53,6 +54,56 @@ var server = require("https").createServer(options, function (req, res) {
     });
 }).listen(process.env.PORT || PORT);
 var io = require("socket.io").listen(server);
+
+// ファイル保存
+var file_write = function (filename, content) {
+
+    function errorCallback(e) {
+        alert("Error: " + e.name);
+    }
+
+    function fsCallback(fs) {
+        fs.root.getFile(filename, { create: true }, function (fileEntry) {
+            fileEntry.createWriter(function (fileWriter) {
+
+                fileWriter.onwriteend = function (e) {
+                    alert("Success! : " + fileEntry.fullPath);
+                };
+
+                fileWriter.onerror = function (e) {
+                    alert("Failed: " + e);
+                };
+
+                // var output = new Blob([content], { type: "video/webm" });
+                var output = toBlob(contet);
+                fileWriter.write(output);
+            }, errorCallback);
+        }, errorCallback);
+    }
+    // クオータを要求する。PERSISTENTでなくTEMPORARYの場合は
+    // 直接 webkitRequestFileSystem を呼んでよい
+    webkitStorageInfo.requestQuota(PERSISTENT, 1024,
+        webkitRequestFileSystem(PERSISTENT, 1024, fsCallback, errorCallback),
+        errorCallback);
+}
+
+function toBlob(base64) {
+    var bin = atob(base64.replace(/^.*,/, ''));
+    var buffer = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) {
+        buffer[i] = bin.charCodeAt(i);
+    }
+    // Blobを作成
+    try {
+        var blob = new Blob([buffer.buffer], {
+            type: 'video/webm'
+        });
+    } catch (e) {
+        return false;
+    }
+    return blob;
+}
+
 
 // ユーザ管理ハッシュ
 var userHash = {};

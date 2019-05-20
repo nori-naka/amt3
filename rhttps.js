@@ -14,15 +14,20 @@ var url = require("url");
 var mime = {
     ".html": "text/html",
     ".css": "text/css",
-    ".js": "text/javascript"
+    ".js": "text/javascript",
+    ".webm": "video/webm"
 };
+
+
+const getUniqueId = getUniqueIdMaker();
+var json_filename = "./BETU_layer/henjyo_stok.back.json";
+var out_str = fs.readFileSync(json_filename, 'utf8')
+var position_array = JSON.parse(out_str)
 
 var options = {
     key: fs.readFileSync(SSL_KEY).toString(),
     cert: fs.readFileSync(SSL_CERT).toString()
 };
-
-const getUniqueId = getUniqueIdMaker();
 
 var allDraw = [];
 
@@ -30,57 +35,34 @@ var allDraw = [];
 var server = require("https").createServer(options, function (req, res) {
     var urlParse = url.parse(req.url, true);
 
-    if (req.method == "POST") {
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-
-        var postData = '';
-        req.on('data', function (chunk) {
-            postData += chunk;
-        }).on('end', function () {
-            const data = JSON.parse(postData);
-
-            var result = window.atob(data.blob.replace(/^.*,/, ''));
-        })
-
-        // POSTデータの構成
-        // {
-        //     name: `${local_id}_${Date.now()}.webm`,
-        //     lat: position.lat,
-        //     lng: position.lng,
-        //     date: new Date().toLocaleString(),
-        //     blob: b64
-        // }
-
-
-    } else {// GET
-        var filePath;
-        if (urlParse.pathname == '/') {
-            filePath = '/index.html';
-        } else {
-            filePath = urlParse.pathname;
-        }
-        //console.log("req.url=" + req.url);
-        //console.log("filePath=" + filePath);
-        //console.log(JSON.stringify(urlParse));
-
-        var fullPath = __dirname + filePath;
-        fs.readFile(fullPath, function (err, data) {
-            if (err) {
-                console.log("NO FILE: " + filePath);
-                res.writeHead(500);
-                res.end('Error loading ' + filePath);
-            } else {
-                res.writeHead(200, {
-                    "Content-Type": mime[path.extname(fullPath)] || "text/html",
-                    "Access-Control-Allow-Origin": "*"
-                });
-                if (urlParse.pathname == "/index.html" && urlParse.query.user_id) {
-                    data = data.toString().replace("initial_user_id", urlParse.query.user_id);
-                }
-                res.end(data);
-            }
-        });
+    var filePath;
+    if (urlParse.pathname == '/') {
+        filePath = '/index.html';
+    } else {
+        filePath = urlParse.pathname;
     }
+    //console.log("req.url=" + req.url);
+    //console.log("filePath=" + filePath);
+    //console.log(JSON.stringify(urlParse));
+
+    var fullPath = __dirname + filePath;
+    fs.readFile(fullPath, function (err, data) {
+        if (err) {
+            console.log("NO FILE: " + filePath);
+            res.writeHead(500);
+            res.end('Error loading ' + filePath);
+        } else {
+            res.writeHead(200, {
+                "Content-Type": mime[path.extname(fullPath)] || "text/html",
+                "Access-Control-Allow-Origin": "*"
+            });
+            if (urlParse.pathname == "/index.html" && urlParse.query.user_id) {
+                data = data.toString().replace("initial_user_id", urlParse.query.user_id);
+            }
+            res.end(data);
+        }
+    });
+
 }).listen(process.env.PORT || PORT);
 var io = require("socket.io").listen(server);
 
@@ -143,6 +125,42 @@ io.on("connection", function (socket) {
             socket.broadcast.emit("start", JSON.stringify({ id: data.src }));
         }
     });
+
+
+    // position_array
+    // [
+    //    { "経度情報": "XXX", "緯度情報": "YYY", "年月日": "YYYY/MM/DD", "video": "/movie/file_name.webm" }
+    //    { "経度情報": "XXX", "緯度情報": "YYY", "年月日": "YYYY/MM/DD", "video": "/movie/file_name.webm" }
+    // ]
+
+    // クライアントから送信されるデータ（画像データ含む）
+    // {
+    //     name: `${local_id}_${Date.now()}.webm`,
+    //     lat: position.lat,
+    //     lng: position.lng,
+    //     date: new Date().toLocaleString(),
+    //     blob: b64
+    // }
+
+    socket.on("file", function (msg) {
+
+        // console.log(msg);
+        var data = JSON.parse(msg);
+
+        console.log(`FILE=${data.name}`)
+        // console.log(data.blob)
+
+        var file_content = data.blob.replace(/^data:video\/webm;base64,/, "")
+        fs.writeFile(`${__dirname}/movie/${data.name}`, file_content, "base64", function (err) {
+            console.log(`socket.on_file: video_file write err=${err}`);
+        });
+
+        position_array.push({ "経度情報": data.lng, "緯度情報": data.lat, "年月日": data.date, "video": "/movie/" + data.name });
+        fs.writeFile(json_filename, JSON.stringify(position_array), function (err) {
+            console.log(`socket.on_file: position_array write err=${err}`);
+        })
+    });
+
 
     // メッセージ送信
     socket.on("publish", function (msg) {

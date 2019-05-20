@@ -13,10 +13,10 @@ BETU_layer.vec_layer;
 BETU_layer.vec_source;
 BETU_layer.detail_text;
 
-BETU_layer.start_time= new Date().getTime();
+BETU_layer.start_time = new Date().getTime();
 BETU_layer.log = function (text) {
     const now_time = new Date().getTime()
-    console.log (`[${now_time - BETU_layer.start_time} ms] ${text}`);
+    console.log(`[${now_time - BETU_layer.start_time} ms] ${text}`);
 }
 
 //-------------------------------------------------------
@@ -29,45 +29,49 @@ BETU_layer.log = function (text) {
 //
 
 BETU_layer.icon_features = [];
-BETU_layer.add = function(){
+BETU_layer.add = function () {
     if (map) {
         //BETU_layer.vec_source = new ol.source.Vector({ features: [] });
         BETU_layer.vec_layer = new ol.layer.Vector({
             source: new ol.source.Vector({ features: [] })
         });
-
-        BETU_layer.log("henjyo_stok.json");
-        $.ajax({
-            url: '/BETU_layer/henjyo_stok.back.json',
-            type:'GET'
-        }).done(function(data){
-            BETU_layer.log("henjyo_stok.json GET");
-            BETU_layer.get_data(data).then(()=>{
-                BETU_layer.vec_layer.getSource().clear();
-                BETU_layer.vec_layer.getSource().addFeatures(BETU_layer.icon_features);
-                BETU_layer.log("henjyo_stok.json addFeature");
-                map.addLayer(BETU_layer.vec_layer);
-                BETU_layer.log("henjyo_stok.json addLayer");
-                map.addOverlay(BETU_layer.pop);
-                BETU_layer.log("henjyo_stok.json addOverlayer");
-                /*
-                setTimeout(function(){
-                    map.addLayer(BETU_layer.vec_layer);
-                    map.addOverlay(BETU_layer.pop);
-                }, 5000);
-                */
-            }).catch((err)=>{
-                console.log(err);
-            })
-        });
+        setInterval(set_icon, 5000);
     }
 }
 
-BETU_layer.setOpacity = function(v){
+function set_icon() {
+    BETU_layer.log("henjyo_stok.json");
+    $.ajax({
+        url: '/BETU_layer/henjyo_stok.back.json',
+        type: 'GET'
+    }).done(function (data) {
+        BETU_layer.log("henjyo_stok.json GET");
+        BETU_layer.get_data(data).then(() => {
+            BETU_layer.vec_layer.getSource().clear();
+            BETU_layer.vec_layer.getSource().addFeatures(BETU_layer.icon_features);
+            BETU_layer.log("henjyo_stok.json addFeature");
+            map.addLayer(BETU_layer.vec_layer);
+            BETU_layer.log("henjyo_stok.json addLayer");
+            map.addOverlay(BETU_layer.pop);
+            BETU_layer.log("henjyo_stok.json addOverlayer");
+            /*
+            setTimeout(function(){
+                map.addLayer(BETU_layer.vec_layer);
+                map.addOverlay(BETU_layer.pop);
+            }, 5000);
+            */
+        }).catch((err) => {
+            console.log(err);
+        });
+    });
+}
+
+
+BETU_layer.setOpacity = function (v) {
     BETU_layer.vec_layer.setOpacity(v);
 }
 
-BETU_layer.remove = function(){
+BETU_layer.remove = function () {
     map.removeLayer(BETU_layer.vec_layer);
 }
 //-------------------------------------------------------------
@@ -90,9 +94,9 @@ BETU_layer.remove = function(){
 // 詳細情報
 BETU_layer.elm = $("<div></div>").append('<p>詳細').append('<p>詳細').append('<p>詳細');
 BETU_layer.elm.append($('<button></button', {
-    text : "更新して閉じる", 
-    on : {
-        click: function(e){
+    text: "更新して閉じる",
+    on: {
+        click: function (e) {
             alert("更新して閉じる例です。\n実際には何もしていません。")
             BETU_layer.close_detail();
         }
@@ -104,36 +108,36 @@ BETU_layer.show_menu = function () {
     $.ajax({
         url: '/BETU_layer/michi_menu.txt',
         type: 'GET',
-    }).done(function(data){
+    }).done(function (data) {
         sidebox_show(data);
     });
 }
 
-BETU_layer.go_edit_php = function(){
+BETU_layer.go_edit_php = function () {
     $.ajax({
         //url: 'https://www.google.com',
         //url: 'http://182.171.89.234:8081/smapho_junkai/edit.php',
         //url: 'http://localhost:8080/edit.php',
         url: '/BETU_layer/edit_php.txt',
         type: 'GET',
-    }).done(function(data){
+    }).done(function (data) {
         sidebox_show(data);
     })
 };
 
-BETU_layer.show_detail = function(){
+BETU_layer.show_detail = function () {
     sidebox_show(BETU_layer.elm);
 }
-BETU_layer.close_detail = function(){
+BETU_layer.close_detail = function () {
     sidebox_close();
 }
 
 //-------------------------------------------------------------
 // 本体側に追加するメニュー
 // 
-BETU_layer.menu =  {
+BETU_layer.menu = {
     click: BETU_layer.show_menu,
-    icon : '/1x/menu_car@1x.png'
+    icon: '/1x/menu_car@1x.png'
 }
 main_menu.app.menu.BETU_layer_menu = BETU_layer.menu;
 
@@ -167,13 +171,13 @@ BETU_layer.pop = new ol.Overlay({
 // 対象featureにclickが発火した際に__$do_func__が呼ばれ、
 // clickが発火したが対象featureが無い場合に__$undo_func__が呼ばれます。
 //
-BETU_layer.popup_show = function(e, HTMLElementStr){
+BETU_layer.popup_show = function (e, HTMLElementStr) {
     BETU_layer.pop_elm.innerHTML = HTMLElementStr;
     BETU_layer.pop.setPosition(e.coordinate);
     //BETU_layer.pop.setVisible(true);
     console.log(JSON.stringify(e.coordinate));
 }
-BETU_layer.popup_hidden = function(){
+BETU_layer.popup_hidden = function () {
     //BETU_layer.pop.setVisible(false);
     BETU_layer.pop.setPosition(undefined);
 }
@@ -186,7 +190,7 @@ BETU_layer.popup_hidden = function(){
 // このfeatureの作成時に本体側イベントで呼び出される関数を埋めています。
 
 BETU_layer.get_data = function (s) {
-    return new Promise(function(resolve, reject){
+    return new Promise(function (resolve, reject) {
         //var arr = s.split(/}\s*,\s*{/);
         var arr = JSON.parse(s);
         arr.forEach(function (data) {
@@ -243,10 +247,9 @@ BETU_layer.get_data = function (s) {
 };
 
 //------------------------------------------------------
-BETU_layer.__$map_on_click__ = function(e){
+BETU_layer.__$map_on_click__ = function (e) {
     BETU_layer.popup_show(e, e.coordinate);
 }
-
 
 //------------------------------------------------------
 
