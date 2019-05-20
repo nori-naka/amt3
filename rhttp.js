@@ -10,23 +10,29 @@ var path = require('path');
 var fs = require("fs");
 var url = require("url");
 
+
 var mime = {
     ".html": "text/html",
     ".css": "text/css",
-    ".js": "text/javascript"
+    ".js": "text/javascript",
+    ".webm": "video/webm"
 };
+
+
+const getUniqueId = getUniqueIdMaker();
+var json_filename = "./BETU_layer/henjyo_stok.back.json";
+var out_str = fs.readFileSync(json_filename, 'utf8')
+var position_array = JSON.parse(out_str)
 
 var options = {
     key: fs.readFileSync(SSL_KEY).toString(),
     cert: fs.readFileSync(SSL_CERT).toString()
 };
 
-const getUniqueId = getUniqueIdMaker();
-
 var allDraw = [];
 
 // サーバの初期化
-//var server = require("https").createServer(options, function(req, res) {
+//var server = require("https").createServer(options, function (req, res) {
 var server = require("http").createServer(function (req, res) {
     var urlParse = url.parse(req.url, true);
 
@@ -57,6 +63,7 @@ var server = require("http").createServer(function (req, res) {
             res.end(data);
         }
     });
+
 }).listen(process.env.PORT || PORT);
 var io = require("socket.io").listen(server);
 
@@ -119,6 +126,42 @@ io.on("connection", function (socket) {
             socket.broadcast.emit("start", JSON.stringify({ id: data.src }));
         }
     });
+
+
+    // position_array
+    // [
+    //    { "経度情報": "XXX", "緯度情報": "YYY", "年月日": "YYYY/MM/DD", "video": "/movie/file_name.webm" }
+    //    { "経度情報": "XXX", "緯度情報": "YYY", "年月日": "YYYY/MM/DD", "video": "/movie/file_name.webm" }
+    // ]
+
+    // クライアントから送信されるデータ（画像データ含む）
+    // {
+    //     name: `${local_id}_${Date.now()}.webm`,
+    //     lat: position.lat,
+    //     lng: position.lng,
+    //     date: new Date().toLocaleString(),
+    //     blob: b64
+    // }
+
+    socket.on("file", function (msg) {
+
+        // console.log(msg);
+        var data = JSON.parse(msg);
+
+        console.log(`FILE=${data.name}`)
+        // console.log(data.blob)
+
+        var file_content = data.blob.replace(/^data:video\/webm;base64,/, "")
+        fs.writeFile(`${__dirname}/movie/${data.name}`, file_content, "base64", function (err) {
+            console.log(`socket.on_file: video_file write err=${err}`);
+        });
+
+        position_array.push({ "経度情報": data.lng, "緯度情報": data.lat, "年月日": data.date, "video": "/movie/" + data.name });
+        fs.writeFile(json_filename, JSON.stringify(position_array), function (err) {
+            console.log(`socket.on_file: position_array write err=${err}`);
+        })
+    });
+
 
     // メッセージ送信
     socket.on("publish", function (msg) {
@@ -211,7 +254,7 @@ io.on("connection", function (socket) {
 
     setInterval(function () {
         socket.emit("renew", JSON.stringify(userHash));
-        //console.log(`SEND RENEW : USERHASH=${JSON.stringify(userHash)}`);
+        // console.log(`SEND RENEW : USERHASH=${JSON.stringify(userHash)}`);
         //console.log(`SEND RENEW : USER_SID=${JSON.stringify(user_sid)}`);
         //console.log("TIME: " + (new Date()).getTime());
 
